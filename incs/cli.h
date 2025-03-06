@@ -3,6 +3,11 @@
 
 #include <stdbool.h>
 #include <arpa/inet.h>
+#include <stdio.h>
+
+typedef enum e_range {
+    START, END, MAX_RANGE
+} t_range;
 
 typedef struct s_arguments {
     enum e_scan_type {
@@ -21,18 +26,18 @@ typedef struct s_arguments {
             | SCAN_XMAS 
             | SCAN_UDP,
     } scan;
-    struct {
-        int start, end;
-    } port_range;
+    int port_range[MAX_RANGE];
     struct s_ip_list {
-        struct in_addr  *list;
-        size_t          count;
+        enum {NO_IPS, CMD_IP, CMD_FILE} cmd;
+        union {
+            struct in_addr  ip;
+            FILE*            fs;
+        } data;
     } ip_list;
     int             speedup;
 } t_arguments;
 
 bool    parse_argument(t_arguments *args, int ac, char* av[]);
-void    show_help(void);
 
 
 #endif // CLI_H

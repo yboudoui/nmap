@@ -1,9 +1,7 @@
 PROJECT = ft_nmap
 PROJECT_DIR = .
 
-RM = /bin/rm
-
-
+RM = rm
 
 SRCS_DIR = $(PROJECT_DIR)/srcs
 OBJS_DIR = $(PROJECT_DIR)/objs
@@ -11,9 +9,17 @@ INCS_DIR = $(PROJECT_DIR)/incs
 DEPS_DIR = $(PROJECT_DIR)/deps
 
 SOURCES =	main.c \
-			cli.c
+			cli/cli.c \
+			cli/utils.c \
+			cli/params/file.c \
+			cli/params/help.c \
+			cli/params/ip.c \
+			cli/params/port.c \
+			cli/params/scan.c \
+			cli/params/speedup.c
 
-HEADER_FILES = cli.h 
+HEADER_FILES = 	cli.h \
+				cli_utils.h 
 
 SRCS = $(addprefix $(SRCS_DIR)/, $(SOURCES))
 
