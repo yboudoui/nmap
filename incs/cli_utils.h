@@ -17,8 +17,7 @@ bool is_only_a_number(char *str, size_t *v, char *error_msg);
 bool check_bound(size_t v, size_t min, size_t max, char *error_msg);
 
 
-
-bool call_me_once(size_t *v);
+bool call_me_once(size_t *v, char *error_msg);
 
 typedef bool (*t_fp_flag)(t_arg_helper*);
 

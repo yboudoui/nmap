@@ -34,7 +34,7 @@ static inline bool port_range_check_order(t_arg_helper *arg) {
 bool ports(t_arg_helper *args) {
     static size_t once = 0;
     if (0
-        || !call_me_once(&once)
+        || !call_me_once(&once, "--port is already used")
         || !expect_at_least_n_args(args, 1, "--ports not enough arguments"))
         return (false);
 
@@ -47,6 +47,8 @@ bool ports(t_arg_helper *args) {
 
     if (endptr[0] == '\0') {
         args->argument->port_range[END] = args->argument->port_range[START];
+        return (shift_args_by(args, 1), true);
+
     } else if (endptr[0] != '-') {
            fprintf(stderr, 
             "ERROR: Malformed range.\n"

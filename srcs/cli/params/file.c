@@ -14,10 +14,15 @@ bool file(t_arg_helper *args) {
     FILE            *fs = NULL;
 
     if (0
-        || !call_me_once(&once)
+        || !call_me_once(&once, "--file is already used")
         || !expect_at_least_n_args(args, 1, "--file not enough arguments")
         || !file_open(args->av[0], &fs))
         return (false);
+
+    if (args->argument->ip_list.cmd == CMD_IP) {
+        fprintf(stderr, "ERROR: --file the parameter --ip is already used\n");
+        return (false);
+    }
 
     args->argument->ip_list.cmd = CMD_FILE;
     args->argument->ip_list.data.fs = fs;

@@ -39,8 +39,11 @@ inline bool check_bound(size_t v, size_t min, size_t max, char *error_msg) {
 }
 
 
-inline bool call_me_once(size_t *v) {
-    if (*v) return (false);
+inline bool call_me_once(size_t *v, char *error_msg) {
+    if (*v) {
+        if (error_msg) fprintf(stderr, "ERROR: %s\n", error_msg);
+        return (false);
+    }
     (*v) += 1;
     return (true);
 }
