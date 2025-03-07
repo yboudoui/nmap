@@ -35,7 +35,14 @@ FLAG_DEPENDENCIES	= -MMD -MF $(patsubst $(SRCS_DIR)/%,$(DEPS_DIR)/%,./$(<:.c=.d)
 FLAG_INCS			= -I $(INCS_DIR)
 FLAGS				= $(FLAG_INCS) $(FLAG_DEPENDENCIES) $(FLAG_DEBUG) $(FLAG_WARNING)
 
-$(PROJECT):  $(OBJS)
+all: $(PROJECT)
+	@if echo $$SHELL | grep "zsh" > /dev/null 2>&1; then \
+		echo "\033[1;37mFor autocompletion please run:\033[0m"; \
+		echo "	fpath+=$$(pwd)"; \
+		echo "	autoload -U compinit && compinit"; \
+	fi
+	
+$(PROJECT): $(OBJS)
 	@echo Building $(PROJECT)
 	@$(CC) $(FLAG_WARNING) $(FLAG_DEBUG) $(OBJS) -o $@
 
@@ -45,7 +52,7 @@ $(OBJS_DIR)/%.o : $(SRCS_DIR)/%.c $(INCS_FILES)
 	@mkdir -p $(patsubst $(OBJS_DIR)/%,$(DEPS_DIR)/%,$(dir ./$(@:.o=.d)))
 	@$(CC) $(FLAGS) -c $< -o $@
 
-all: $(PROJECT)
+
 
 clean:
 	@echo "Cleaning files..."

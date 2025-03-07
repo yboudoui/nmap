@@ -18,7 +18,8 @@ _ft_nmap() {
     "${options[@]}" \
     '*::arg:->args'
 
-  case $state in scan
+  case $state in 
+    scan)
       _values "scan type" "SYN" NULL ACK FIN XMAS UDP
       ;;
   esac
