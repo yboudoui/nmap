@@ -6,27 +6,19 @@
 
 typedef struct s_arg_helper {
     t_arguments *argument;
-    int ac;
-    char** av;
+    int     ac;
+    char    **av;
 } t_arg_helper;
 
-typedef struct s_expected {
-    size_t  *once;
-    char    *arg_name;
-    size_t  minimum_argument_count;
-} t_expected;
-bool check_args(t_arg_helper *args, t_expected expt);
-
-#define CHECK_ARGS(args, ...) do{ static size_t once = 0;\
-    if (!check_args(args, (t_expected){ .once = &once, __VA_ARGS__ })) return (true);\
-} while (0)
-
-
-void shift_args_by(t_arg_helper* args, int n);
+bool shift_args_by(t_arg_helper* args, int n);
 bool match_with(const char *ref, char *str);
-bool expect_at_least_n_args(t_arg_helper *args, int n);
-bool call_me_once(size_t *v);
+bool expect_at_least_n_args(t_arg_helper *args, int n, char *error_msg);
+bool is_only_a_number(char *str, size_t *v, char *error_msg);
+bool check_bound(size_t v, size_t min, size_t max, char *error_msg);
 
+
+
+bool call_me_once(size_t *v);
 
 typedef bool (*t_fp_flag)(t_arg_helper*);
 
@@ -38,5 +30,7 @@ bool scan(t_arg_helper*);
 bool file(t_arg_helper*);
 
 void show_help(void);
+
+typedef void (*t_fp_on_error)(char *fmt, ...);
 
 #endif // CLI_UTILS_H

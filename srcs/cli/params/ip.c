@@ -3,8 +3,7 @@
 
 static bool parse_ip(char *str, struct in_addr *ip) {
     if (inet_pton(AF_INET, str, ip) != 1) {
-        fprintf(stderr, "ERROR: malformed ip %s\n", str);
-        perror(NULL);
+        fprintf(stderr, "ERROR: malformed ip [%s]\n", str);
         return (false);
     }
 
@@ -22,14 +21,16 @@ static bool parse_ip(char *str, struct in_addr *ip) {
 }
 
 bool ip(t_arg_helper *args) {
-    CHECK_ARGS(args, 
-        .arg_name = "--ip",
-        .minimum_argument_count = 2);
-
+    static size_t   once = 0;
     struct in_addr  ip;
-    if (!parse_ip(args->av[1], &ip)) return (false);
+
+    if (0
+        || !call_me_once(&once)
+        || !expect_at_least_n_args(args, 1, "--ip not enough arguments")
+        || !parse_ip(args->av[0], &ip))
+        return (false);
+
     args->argument->ip_list.cmd = CMD_IP;
     args->argument->ip_list.data.ip = ip;
-    shift_args_by(args, 2);
-    return (true);
+    return (shift_args_by(args, 1), true);
 }

@@ -1,18 +1,25 @@
 #include "cli_utils.h"
 
-bool file(t_arg_helper *args) {
-    CHECK_ARGS(args, 
-        .arg_name = "--file",
-        .minimum_argument_count = 2);
-
-    FILE *fs = fopen(args->av[1], "r");
-    if (fs == NULL) {
-        fprintf(stderr, "ERROR: unable to open a file %s\n", args->av[1]);
-        perror(NULL);
+static bool file_open(char *file_path, FILE **fs) {
+    (*fs) = fopen(file_path, "r");
+    if ((*fs) == NULL) {
+        fprintf(stderr, "ERROR: unable to open a file %s\n", file_path);
         return(false);
     }
+    return (true);
+}
+
+bool file(t_arg_helper *args) {
+    static size_t   once = 0;
+    FILE            *fs = NULL;
+
+    if (0
+        || !call_me_once(&once)
+        || !expect_at_least_n_args(args, 1, "--file not enough arguments")
+        || !file_open(args->av[0], &fs))
+        return (false);
+
     args->argument->ip_list.cmd = CMD_FILE;
     args->argument->ip_list.data.fs = fs;
-    shift_args_by(args, 2);
-    return (true);
+    return (shift_args_by(args, 1), true);
 }

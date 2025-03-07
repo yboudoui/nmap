@@ -1,0 +1,27 @@
+#compdef ft_nmap
+
+_ft_nmap() {
+  local -a options
+  local curcontext="$curcontext" state line
+
+  # Define basic options
+  options=(
+    '--help:Show help information'
+    '--ip[Specify an IP address]:_hosts'  # Uses built-in host completion
+    '--ports[Specify a port or range]:_ports'  # Uses built-in port completion
+    '--file[Specify a file name]:_files'  # Uses built-in file completion
+    '--scan[Specify scan type]:->scan'
+    '--speedup[Specify speedup value]:_numbers'  # Uses built-in number completion
+  )
+
+  _arguments -C \
+    "${options[@]}" \
+    '*::arg:->args'
+
+  case $state in scan
+      _values "scan type" "SYN" NULL ACK FIN XMAS UDP
+      ;;
+  esac
+}
+
+compdef _ft_nmap ./ft_nmap

@@ -23,7 +23,7 @@ static inline bool port_is_a_number(t_arg_helper *arg, t_range range, char *src,
 static inline bool port_range_check_order(t_arg_helper *arg) {
     if (arg->argument->port_range[START] > arg->argument->port_range[END]) {
         fprintf(stderr,
-            "ERROR: Bad range order.\nUsage --port: <min:max> but you provide <%d:%d>\n",
+            "ERROR: Bad range order.\nUsage --port: <min-max> but you provide <%d-%d>\n",
             arg->argument->port_range[START],
             arg->argument->port_range[END]);
         return(false);
@@ -32,11 +32,13 @@ static inline bool port_range_check_order(t_arg_helper *arg) {
 }
 
 bool ports(t_arg_helper *args) {
-    CHECK_ARGS(args, 
-        .arg_name = "--ports",
-        .minimum_argument_count = 2);
+    static size_t once = 0;
+    if (0
+        || !call_me_once(&once)
+        || !expect_at_least_n_args(args, 1, "--ports not enough arguments"))
+        return (false);
 
-    char *tmp = args->av[1];
+    char *tmp = args->av[0];
     char *endptr;
 
     if (!port_is_a_number(args, START, tmp, &endptr)) {
@@ -45,24 +47,24 @@ bool ports(t_arg_helper *args) {
 
     if (endptr[0] == '\0') {
         args->argument->port_range[END] = args->argument->port_range[START];
-    } else if (endptr[0] != ':' || endptr[0] != '-') {
+    } else if (endptr[0] != '-') {
            fprintf(stderr, 
             "ERROR: Malformed range.\n"
-            "Usage --port: <min:max> or <min-max>\n"
+            "Usage --port: <min-max>\n"
             "Got: %s\n",
             tmp);
+            fprintf(stderr, "[%d %c]\n", endptr[0], endptr[0]);
             return (false);
     }
     if (!port_is_a_number(args, END, endptr + 1, &endptr)) return (false);
-    if(endptr[0]) {
+    if (endptr[0]) {
             fprintf(stderr, 
             "ERROR: Malformed range.\n"
-            "Usage --port: <min:max> or <min-max>\n"
+            "Usage --port: <min-max>\n"
             "Got: %s\n",
             tmp);
             return (false);
     }
     if (!port_range_check_order(args)) return (false);
-    shift_args_by(args, 2);
-    return (true);
+    return (shift_args_by(args, 1), true);
 }

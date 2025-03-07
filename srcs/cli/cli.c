@@ -2,35 +2,50 @@
 
 #include <string.h>
 
-#define MAX_PARAMETER 6 
-static const t_fp_flag    flags[MAX_PARAMETER] = {
-    help, ports, ip, speedup, scan, file
-};
+static t_fp_flag   get_command(char *str) {
+    static const struct s_command_map {
+        char        *name;
+        t_fp_flag   callback;
+    } command_map[] = {
+        {"--help",      help},
+        {"--ports",     ports},
+        {"--ip",        ip},
+        {"--speedup",   speedup},
+        {"--scan",      scan},
+        {"--file",      file},
+        {NULL, NULL},
+    };
+    for(int i = 0; command_map[i].name; i++) {
+        if (match_with(command_map[i].name, str)) 
+            return (command_map[i].callback);
+    }
+    return (NULL);
+}
 
-bool    parse_argument(t_arguments *argument, int ac, char* av[]) {
-    memset(argument, 0, sizeof(t_arguments));
-    argument->port_range[START] = 1;
-    argument->port_range[END] = 1024;
-    argument->scan = SCAN_ALL;
-    t_arg_helper        helper  = { argument, ac - 1, av + 1 };
+static void init_arguments(t_arguments* args) {
+    memset(args, 0, sizeof(t_arguments));
+    args->port_range[START] = 1;
+    args->port_range[END] = 1024;
+    args->scan_flags = SCAN_ALL;
+}
+
+bool    parse_argument(t_arguments *args, int ac, char* av[]) {
+    init_arguments(args);
+    t_arg_helper        helper  = { args, ac - 1, av + 1 };
 
     if (ac <= 1) {
         show_help();
         return (false);
     }
     while (helper.ac) {
-        int i = 0;
-        while(i < MAX_PARAMETER) {
-            if (!flags[i](&helper)) {
-                printf("%d\n", i);
-                return (false);
-            }
-            i += 1;
-        }
-        if (i == MAX_PARAMETER) {
+        t_fp_flag cmd = get_command(*helper.av);
+        if (cmd == NULL) {
             fprintf(stderr, "ERROR: unexpected parameters. Got %s\n", helper.av[0]);
             show_help();
+            return (false);
         }
+        if (!shift_args_by(&helper, 1)) break;
+        if (!cmd(&helper)) return (false);
     }
     return (true);
 }

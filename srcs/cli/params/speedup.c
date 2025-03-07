@@ -1,33 +1,16 @@
 #include "cli_utils.h"
 
-static inline bool speedup_is_number(t_arg_helper *arg) {
-    char *end;
-    arg->argument->speedup = strtol(arg->av[1], &end, 10);
-    return (end != arg->av[1] && end[0] == '\0');
-}
-
-static inline bool speedup_check_bound(t_arg_helper *arg) {
-    if (arg->argument->speedup < 0 ||  arg->argument->speedup > 250) {
-        fprintf(stderr, 
-            "ERROR: <speedup> out of bound.\n"
-            "Usage --speedup: <speedup> must be between 0 and 250\n"
-            "Got: %d\n",
-            arg->argument->speedup);
-        return (false);
-    }
-    return (true);
-}
-
 bool speedup(t_arg_helper *args) {
-    CHECK_ARGS(args, 
-        .arg_name = "--speedup",
-        .minimum_argument_count = 2);
-    printf("llo\n");
-    
+    size_t          speedup;
+    static size_t   once = 0;
+
     if (0
-        || !speedup_is_number(args)
-        || !speedup_check_bound(args))
+        || !call_me_once(&once)
+        || !expect_at_least_n_args(args, 1, "--speedup not enough arguments")
+        || !is_only_a_number(args->av[0], &speedup, "--speedup <value> is not a number")
+        || !check_bound(speedup, 0, 250, "--speedup <value> out of bound"))
         return(false);
-    shift_args_by(args, 2);
-    return (true);
+
+    args->argument->speedup = speedup;
+    return (shift_args_by(args, 1), true);
 }
