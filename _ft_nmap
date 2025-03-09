@@ -12,6 +12,7 @@ _ft_nmap() {
     '--file[Specify a file name]:_files'  # Uses built-in file completion
     '--scan[Specify scan type]:->scan'
     '--speedup[Specify speedup value]:_numbers'  # Uses built-in number completion
+    '--output-format[Specify the output format]:->format'  # Uses built-in number completion
   )
 
   _arguments -C \
@@ -20,7 +21,10 @@ _ft_nmap() {
 
   case $state in 
     scan)
-      _values "scan type" "SYN" NULL ACK FIN XMAS UDP
+      _values "scan type" SYN NULL ACK FIN XMAS UDP
+      ;;
+    format)
+      _values "format type" RAW CSV PRETTY
       ;;
   esac
 }

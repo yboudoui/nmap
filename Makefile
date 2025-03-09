@@ -16,6 +16,7 @@ SOURCES =	main.c \
 			cli/params/ip.c \
 			cli/params/port.c \
 			cli/params/scan.c \
+			cli/params/output_format.c \
 			cli/params/speedup.c
 
 HEADER_FILES = 	cli.h \

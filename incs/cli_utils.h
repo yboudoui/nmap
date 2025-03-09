@@ -27,6 +27,8 @@ bool ip(t_arg_helper*);
 bool speedup(t_arg_helper*);
 bool scan(t_arg_helper*);
 bool file(t_arg_helper*);
+bool output_format(t_arg_helper *);
+
 
 void show_help(void);
 

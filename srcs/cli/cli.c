@@ -7,13 +7,14 @@ static t_fp_flag   get_command(char *str) {
         char        *name;
         t_fp_flag   callback;
     } command_map[] = {
-        {"--help",      help},
-        {"--ports",     ports},
-        {"--ip",        ip},
-        {"--speedup",   speedup},
-        {"--scan",      scan},
-        {"--file",      file},
-        {NULL, NULL},
+        {"--help",          help},
+        {"--ports",         ports},
+        {"--ip",            ip},
+        {"--speedup",       speedup},
+        {"--scan",          scan},
+        {"--file",          file},
+        {"--output-format", output_format},
+        {NULL,              NULL},
     };
     for(int i = 0; command_map[i].name; i++) {
         if (match_with(command_map[i].name, str)) 
