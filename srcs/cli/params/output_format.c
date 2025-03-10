@@ -21,7 +21,6 @@ static t_output_format   get_output_format_type(char *str) {
 }
 
 bool output_format(t_arg_helper *args) {
-    t_output_format flags = FORMAT_NONE;
     static size_t   once = 0;
     if (0
         || !call_me_once(&once, "--output-format is already used")

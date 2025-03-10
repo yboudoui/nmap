@@ -35,16 +35,17 @@ typedef enum e_scan_type {
 } t_scan_type;
 
 typedef struct s_arguments {
-    t_scan_type scan_flags;
-    int port_range[MAX_RANGE];
     struct s_ip_list {
-        enum {NO_IPS, CMD_IP, CMD_FILE} cmd;
+        enum e_ip_cmd {NO_IPS, CMD_IP, CMD_FILE} cmd;
         union {
             struct in_addr  ip;
             FILE*            fs;
         } data;
-    } ip_list;
-    size_t  speedup;
+    }           ip_list;
+    t_scan_type scan_flags;
+    int         port_range[MAX_RANGE];
+
+    size_t          speedup;
     t_output_format format;
 } t_arguments;
 

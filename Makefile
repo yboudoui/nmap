@@ -9,6 +9,7 @@ INCS_DIR = $(PROJECT_DIR)/incs
 DEPS_DIR = $(PROJECT_DIR)/deps
 
 SOURCES =	main.c \
+			pool.c \
 			cli/cli.c \
 			cli/utils.c \
 			cli/params/file.c \
@@ -20,7 +21,8 @@ SOURCES =	main.c \
 			cli/params/speedup.c
 
 HEADER_FILES = 	cli.h \
-				cli_utils.h 
+				cli_utils.h \
+				pool.h 
 
 SRCS = $(addprefix $(SRCS_DIR)/, $(SOURCES))
 

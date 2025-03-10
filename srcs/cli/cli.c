@@ -28,6 +28,7 @@ static void init_arguments(t_arguments* args) {
     args->port_range[START] = 1;
     args->port_range[END] = 1024;
     args->scan_flags = SCAN_ALL;
+    args->speedup = 1;
 }
 
 bool    parse_argument(t_arguments *args, int ac, char* av[]) {

@@ -8,6 +8,7 @@ void show_help(void) {
     printf("--ip <ip address>\n");
     printf("--ports <value> or <min-max>\n");
     printf("--file <file name>\n");
+    printf("--output-format [RAW CSV PRETTY]\n");
     printf("--scan <file name>\n");
     printf("\tSYN\n");
     printf("\tNULL\n");
