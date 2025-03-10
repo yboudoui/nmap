@@ -6,24 +6,47 @@
 typedef struct s_state {
     size_t          scan_index;
     int             current_port;
-    bool            ip_used;
+    bool            ip_available;
+    struct in_addr  ip;
     t_arguments     *args;
+    bool            finish;
 } t_state;
 
 static bool get_next_ip(t_state *state, t_task *task) {
     char line[INET_ADDRSTRLEN];
 
+    if (state->finish) {
+        return (false);
+        // if (state->ip_available) {
+        //     state->ip_available = false;
+        //     return (true);
+        // } else return (false);
+    }
+
+    // if (state->finish) {
+    //     state->ip_available = false;
+    //     return (false);
+    // }
+
     switch (state->args->ip_list.cmd) {
     case CMD_IP: {
-        if (state->ip_used) return (false);
+        // if (state->ip_available) {
+        //     state->finish = true;
+        //     // state->args->ip_list.cmd = NO_IPS;
+        //     // state->ip_available = false;
+        //     return (false);
+        // }
         task->ip = state->args->ip_list.data.ip;
-        state->ip_used = true;
+        state->ip_available = true;
+        state->ip = state->args->ip_list.data.ip;
+        state->finish = true;
         return (true);
     }
     case CMD_FILE: {
         if (!fgets(line, sizeof(line), state->args->ip_list.data.fs)) {
             fclose(state->args->ip_list.data.fs);
-            state->ip_used = true;
+            state->ip_available = true;
+            state->current_port = 0;
             return (false);
         }
         line[strcspn(line, "\n")] = 0;
@@ -31,18 +54,20 @@ static bool get_next_ip(t_state *state, t_task *task) {
             return (true); 
         } else {
             fprintf(stderr, "Invalid IP address format: %s\n", line); // Error handling
+            state->current_port = 0;
+
             return false; // Invalid IP format
         }
     }
-    default: return (false);
+    default: {
+        state->current_port = 0;
+        return (false);
+    }
     }
 }
 
 static bool get_next_port(t_state *state, t_task *task) {    
-    if (!state->ip_used) {
-        // state->current_port = 0;
-        return (false);
-    }
+    if (state->ip_available == false) return (false);
 
     if (state->current_port == 0) {
         state->current_port = state->args->port_range[START];
@@ -58,10 +83,8 @@ static bool get_next_port(t_state *state, t_task *task) {
 }
 
 static bool get_next_scan_type(t_state *state, t_task *task) {
-    if (!state->current_port) {
-        task->scan_flag = SCAN_NONE;
-        return (false);
-    }
+    if (state->current_port == 0) return (false);
+    
     static const t_scan_type    all[] =  {
         SCAN_SYN, SCAN_NULL, SCAN_ACK,
         SCAN_FIN, SCAN_XMAS, SCAN_UDP,
@@ -79,26 +102,49 @@ static bool get_next_scan_type(t_state *state, t_task *task) {
     return (false);
 }
 
+// #define PRINT_DEBUG
+#ifdef PRINT_DEBUG
+#define DEBUG(fmt , ...) printf(fmt, ##__VA_ARGS__)
+#else
+#define DEBUG(fmt , ...) do{}while(0)
+#endif
+
+
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static bool get_next_task(t_task *task, t_state *state) {
     pthread_mutex_lock(&mutex);
 
+    DEBUG("try get_next_scan_type\n");
+
     if (!get_next_scan_type(state, task)) {
+        DEBUG("try get_next_port\n");
         if (!get_next_port(state, task)) {
+            DEBUG("try get_next_ip\n");
+            DEBUG("available %d finish %d\n", state->ip_available, state->finish);
+            
             if (!get_next_ip(state, task)) {
+                state->ip_available = false;
+                // state->finish = true;
+
                 pthread_mutex_unlock(&mutex);
                 return (false);
             }
+            DEBUG("retry get_next_port\n");
             if (!get_next_port(state, task)) {
                 pthread_mutex_unlock(&mutex);
                 return (false);
             }
+        } else {
+            task->ip = state->ip;
         }
+        DEBUG("retry get_next_scan_type\n");
         if (!get_next_scan_type(state, task)) {
             pthread_mutex_unlock(&mutex);
             return (false);
         }
     }
+    task->ip = state->ip;
+    task->port = state->current_port;
     pthread_mutex_unlock(&mutex);
     return (true);
 }
@@ -119,7 +165,7 @@ static char* get_scan_flag_name(t_scan_type scan_type) {
 }
 
 static void print_task(t_task task) {
-    static int i = 0;
+    static int i = 1;
     char ip_str[INET_ADDRSTRLEN] = {0};
     inet_ntop(AF_INET, &task.ip, ip_str, sizeof(ip_str));
     printf("%d - %s:%d %s\n", i, ip_str, task.port, get_scan_flag_name(task.scan_flag)); 
@@ -130,10 +176,9 @@ static pthread_mutex_t mutex_print = PTHREAD_MUTEX_INITIALIZER;
 
 static void* routine(void *data) {
     t_task      task = {};
-t_state * s = data;
     while (get_next_task(&task, data)) {
+
         pthread_mutex_lock(&mutex_print);
-        printf("-> %d\n", s->i);
         print_task(task);
         pthread_mutex_unlock(&mutex_print);
     }
