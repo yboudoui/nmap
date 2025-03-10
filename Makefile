@@ -36,7 +36,8 @@ FLAG_DEBUG			= -g -ggdb3
 FLAG_WARNING		= -Wall -Wextra -Winline -Wformat
 FLAG_DEPENDENCIES	= -MMD -MF $(patsubst $(SRCS_DIR)/%,$(DEPS_DIR)/%,./$(<:.c=.d))
 FLAG_INCS			= -I $(INCS_DIR)
-FLAGS				= $(FLAG_INCS) $(FLAG_DEPENDENCIES) $(FLAG_DEBUG) $(FLAG_WARNING)
+FLAG_LIBS			= -lpcap
+FLAGS				= $(FLAG_INCS) $(FLAG_DEPENDENCIES) $(FLAG_DEBUG) $(FLAG_WARNING) $(FLAG_LIBS)
 
 all: $(PROJECT)
 	@if echo $$SHELL | grep "zsh" > /dev/null 2>&1; then \

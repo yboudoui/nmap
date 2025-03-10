@@ -9,6 +9,7 @@ typedef struct s_task {
     int             port;
 } t_task;
 
-bool    pool(t_arguments *args);
+typedef void    (t_fp_callback)(void);
+bool pool(t_arguments *args, t_fp_callback callback);
 
 #endif // POOL_H

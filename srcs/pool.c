@@ -17,25 +17,11 @@ static bool get_next_ip(t_state *state, t_task *task) {
 
     if (state->finish) {
         return (false);
-        // if (state->ip_available) {
-        //     state->ip_available = false;
-        //     return (true);
-        // } else return (false);
     }
 
-    // if (state->finish) {
-    //     state->ip_available = false;
-    //     return (false);
-    // }
 
     switch (state->args->ip_list.cmd) {
     case CMD_IP: {
-        // if (state->ip_available) {
-        //     state->finish = true;
-        //     // state->args->ip_list.cmd = NO_IPS;
-        //     // state->ip_available = false;
-        //     return (false);
-        // }
         task->ip = state->args->ip_list.data.ip;
         state->ip_available = true;
         state->ip = state->args->ip_list.data.ip;
@@ -53,7 +39,7 @@ static bool get_next_ip(t_state *state, t_task *task) {
         if (inet_pton(AF_INET, line, &task->ip) == 1) {
             return (true); 
         } else {
-            fprintf(stderr, "Invalid IP address format: %s\n", line); // Error handling
+            fprintf(stderr, "Invalid IP address format: %s\n", line); // TODO: Error handling
             state->current_port = 0;
 
             return false; // Invalid IP format
@@ -124,8 +110,6 @@ static bool get_next_task(t_task *task, t_state *state) {
             
             if (!get_next_ip(state, task)) {
                 state->ip_available = false;
-                // state->finish = true;
-
                 pthread_mutex_unlock(&mutex);
                 return (false);
             }
@@ -154,12 +138,12 @@ static bool get_next_task(t_task *task, t_state *state) {
 
 static char* get_scan_flag_name(t_scan_type scan_type) {
     switch (scan_type){
-    case SCAN_SYN:  return ("SCAN_SYN");
-    case SCAN_NULL: return ("SCAN_NULL");
-    case SCAN_ACK:  return ("SCAN_ACK");
-    case SCAN_FIN:  return ("SCAN_FIN");
-    case SCAN_XMAS: return ("SCAN_XMAS");
-    case SCAN_UDP:  return ("SCAN_UDP");
+    case SCAN_SYN:  return ("SYN");
+    case SCAN_NULL: return ("NULL");
+    case SCAN_ACK:  return ("ACK");
+    case SCAN_FIN:  return ("FIN");
+    case SCAN_XMAS: return ("XMAS");
+    case SCAN_UDP:  return ("UDP");
     default: return (NULL);
     }
 }
@@ -185,21 +169,25 @@ static void* routine(void *data) {
     return (NULL);
 }
 
-static bool run_pool(size_t threads_count, void *data) {
-    pthread_t	*threads = calloc(threads_count, sizeof(pthread_t));
-    if (threads == NULL) return (false);
-    for(size_t i = 0; i < threads_count; i++) {
-        pthread_create(&threads[i], NULL, routine, data);
+bool pool(t_arguments *args, t_fp_callback callback) {
+    if (!args || !callback) {
+        return (false);
     }
-    for(size_t i = 0; i < threads_count; i++) {
-		pthread_join(threads[i], NULL);
-    }
-    return (free(threads), true);
-}
-
-bool    pool(t_arguments *args) {
     t_state pool_state = {
         .args = args
     };
-    return (run_pool(args->speedup, &pool_state));
+    size_t threads_count = args->speedup;
+    pthread_t	*threads = calloc(threads_count, sizeof(pthread_t));
+    if (threads == NULL) {
+        return (false);
+    }
+    for(size_t i = 0; i < threads_count; i++) {
+        pthread_create(&threads[i], NULL, routine, &pool_state);
+    }
+    callback();
+    for(size_t i = 0; i < threads_count; i++) {
+		pthread_join(threads[i], NULL);
+    }
+
+    return (free(threads), true);
 }

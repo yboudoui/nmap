@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "pool.h"
+#include "packet.h"
 
 
 int main(int ac, char *av[]) {
@@ -8,7 +9,11 @@ int main(int ac, char *av[]) {
     if (!parse_argument(&args, ac, av)) {
         return (1);
     }
-    if (!pool(&args)) {
+    if (!init_packet()) {
+        return (1);
+    }
+
+    if (!pool(&args, packet_handler)) {
         return (1);
     }
     return (0);
