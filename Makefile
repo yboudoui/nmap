@@ -10,6 +10,10 @@ DEPS_DIR = $(PROJECT_DIR)/deps
 
 SOURCES =	main.c \
 			pool.c \
+			packet/packet.c \
+			packet/tcp.c \
+			packet/udp.c \
+			packet/icmp.c \
 			cli/cli.c \
 			cli/utils.c \
 			cli/params/file.c \
@@ -18,11 +22,20 @@ SOURCES =	main.c \
 			cli/params/port.c \
 			cli/params/scan.c \
 			cli/params/output_format.c \
-			cli/params/speedup.c
+			cli/params/speedup.c \
+			queue/add.c \
+			queue/count.c \
+			queue/destroy.c \
+			queue/find.c \
+			queue/init.c \
+			queue/print.c \
+			queue/remove.c
 
 HEADER_FILES = 	cli.h \
 				cli_utils.h \
-				pool.h 
+				packet.h \
+				pool.h \
+				queue.h
 
 SRCS = $(addprefix $(SRCS_DIR)/, $(SOURCES))
 
@@ -36,8 +49,8 @@ FLAG_DEBUG			= -g -ggdb3
 FLAG_WARNING		= -Wall -Wextra -Winline -Wformat
 FLAG_DEPENDENCIES	= -MMD -MF $(patsubst $(SRCS_DIR)/%,$(DEPS_DIR)/%,./$(<:.c=.d))
 FLAG_INCS			= -I $(INCS_DIR)
-FLAG_LIBS			= -lpcap
-FLAGS				= $(FLAG_INCS) $(FLAG_DEPENDENCIES) $(FLAG_DEBUG) $(FLAG_WARNING) $(FLAG_LIBS)
+FLAG_LIBS			= -lpthread -lpcap
+FLAGS				= $(FLAG_INCS) $(FLAG_DEPENDENCIES) $(FLAG_DEBUG) $(FLAG_WARNING)
 
 all: $(PROJECT)
 	@if echo $$SHELL | grep "zsh" > /dev/null 2>&1; then \
@@ -48,15 +61,13 @@ all: $(PROJECT)
 	
 $(PROJECT): $(OBJS)
 	@echo Building $(PROJECT)
-	@$(CC) $(FLAG_WARNING) $(FLAG_DEBUG) $(OBJS) -o $@
+	@$(CC) $(FLAG_WARNING) $(FLAG_DEBUG) $(OBJS) -o $@ $(FLAG_LIBS)
 
 $(OBJS_DIR)/%.o : $(SRCS_DIR)/%.c $(INCS_FILES)
 	@echo "Compiling $(notdir $<)..."
 	@mkdir -p $(dir $@)
 	@mkdir -p $(patsubst $(OBJS_DIR)/%,$(DEPS_DIR)/%,$(dir ./$(@:.o=.d)))
 	@$(CC) $(FLAGS) -c $< -o $@
-
-
 
 clean:
 	@echo "Cleaning files..."
@@ -68,6 +79,11 @@ fclean: clean
 	@$(RM) -f $(PROJECT)
 
 re: fclean all
+
+vagrant:
+	@vagrant up
+	@echo "Please add this setting to your ~/.ssh/config"
+	@vagrant ssh-config
 
 -include $(DEPS)
 
