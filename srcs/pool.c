@@ -103,6 +103,45 @@ static bool get_next_task(t_task *task, t_state *state) {
     return (true);
 }
 
+/*
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static bool get_next_task(t_task *task, t_state *state) {
+    // Initialize task as invalid
+    memset(task, 0, sizeof(t_task));
+    
+    // Lock the mutex with error checking
+    if (pthread_mutex_lock(&mutex) != 0) {
+        perror("Failed to lock mutex");
+        return false;
+    }
+    
+    bool success = false;
+    
+    // Try to get a complete task (IP + port + scan type)
+    if (get_next_ip(state, task)) {
+        if (get_next_port(state, task)) {
+            if (get_next_scan_type(state, task)) {
+                success = true;
+            } else {
+                // Reset port if no more scan types
+                task->port = 0;
+            }
+        } else {
+            // Reset IP if no more ports
+            memset(&task->ip, 0, sizeof(task->ip));
+        }
+    }
+    
+    // Unlock the mutex with error checking
+    if (pthread_mutex_unlock(&mutex) != 0) {
+        perror("Failed to unlock mutex");
+        // Continue anyway since we're returning
+    }
+    
+    return success;
+}
+*/
 
 #include <stdio.h>
 
