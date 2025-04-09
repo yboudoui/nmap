@@ -20,7 +20,23 @@ void on_tcp(t_data data)
     // {
     //     return;
     // }
-    
+    printf("flag %d\n", flags);
+    u_int8_t flags = tcp_header->th_flags;
+    if (flags == 0) {
+        printf("[NULL/NONE Scan] No flags set\n");
+    } 
+    else if (flags & TH_SYN && !(flags & TH_ACK)) {
+        printf("[SYN Scan] SYN flag set\n");
+    }
+    else if (flags & TH_FIN && flags & TH_URG && flags & TH_PUSH) {
+        printf("[XMAS Scan] FIN/URG/PSH flags set\n");
+    }
+    else if (flags & TH_FIN && !(flags & TH_ACK)) {
+        printf("[FIN Scan] FIN flag set\n");
+    }
+    else if (flags & TH_ACK && !(flags & TH_SYN)) {
+        printf("[ACK Scan] ACK flag set\n");
+    }
     
     // SYN Scan Response
     if (tcp_header->syn && tcp_header->ack) {

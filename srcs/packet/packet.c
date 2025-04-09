@@ -53,6 +53,22 @@ bool init_pcap(void *data)
         return (false);
     }
 
+    int status = pcap_set_timeout(handle, 1000);  // Timeout in milliseconds
+    if (status != 0) {
+        fprintf(stderr, "Warning: Couldn't set timeout\n");
+    }
+
+/*
+    // Essential for scanning
+    pcap_set_promisc(handle, 1);       // Promiscuous mode
+    pcap_set_snaplen(handle, 65535);   // Full packet capture
+    pcap_set_timeout(handle, 1000);    // 1s timeout
+
+    // Advanced optimizations (if supported)
+    pcap_set_immediate_mode(handle, 1);      // Reduce latency
+    pcap_set_buffer_size(handle, 10*1024*1024);  // 10MB buffer
+*/
+
     activate_error = pcap_activate(handle);
     if (activate_error != 0)
     {
@@ -61,8 +77,14 @@ bool init_pcap(void *data)
         pcap_freealldevs(devices);
         return (false);
     }
+    
+    printf("START %s\n", __FUNCTION__);
+    if (pcap_loop(handle, 10, packet_handler, data) < 0)
+    {
+        fprintf(stderr, "pcap_loop failed: %s\n", pcap_geterr(handle));
+    }
+    printf("END %s\n", __FUNCTION__);
 
-    pcap_loop(handle, 0, packet_handler, data); // TODO: handler error
 
     pcap_close(handle);
     pcap_freealldevs(devices);
