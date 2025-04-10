@@ -5,6 +5,8 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 
+#include "scan_type.h"
+
 typedef enum e_output_format {
     FORMAT_NONE,
     FORMAT_RAW,
@@ -16,30 +18,12 @@ typedef enum e_range {
     START, END, MAX_RANGE
 } t_range;
 
-typedef enum e_scan_type {
-    SCAN_NONE  = 0,
-    SCAN_SYN   = 1 << 0,
-    SCAN_NULL  = 1 << 1,
-    SCAN_ACK   = 1 << 2,
-    SCAN_FIN   = 1 << 3,
-    SCAN_XMAS  = 1 << 4,
-    SCAN_UDP   = 1 << 5,
-    SCAN_ALL   = 0
-        | SCAN_NONE
-        | SCAN_SYN
-        | SCAN_NULL
-        | SCAN_ACK
-        | SCAN_FIN
-        | SCAN_XMAS
-        | SCAN_UDP
-} t_scan_type;
-
 typedef struct s_arguments {
     struct s_ip_list {
         enum e_ip_cmd {NO_IPS, CMD_IP, CMD_FILE} cmd;
         union {
-            struct in_addr  ip;
-            FILE*            fs;
+            in_addr_t   ip;
+            FILE*       fs;
         } data;
     }           ip_list;
     t_scan_type scan_flags;

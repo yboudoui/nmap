@@ -1,29 +1,22 @@
-#include "pool.h"
 #include "packet.h"
-
-t_data  new_data(unsigned char *user_data, const unsigned char *packet)
-{
-    t_data  data;
-    data.data = user_data;
-    data.packet = packet;
-    data.ip_header = (struct iphdr *)(data.packet + 14), // Skip Ethernet header
-    data.iphdrlen = data.ip_header->ihl*4;
-    return (data);
-}
 
 static void packet_handler(unsigned char *user_data, const struct pcap_pkthdr *pkthdr, const unsigned char *packet)
 {
     (void)pkthdr;
+    t_packet  data = new_packet(user_data, packet);
 
-    t_data  data = new_data(user_data, packet);
-    switch (data.ip_header->protocol)
+    if (data.eth.type != ETHERTYPE_IP)
+    {
+        return;
+    }
+    switch (data.ip.header->protocol)
     {
         case IPPROTO_TCP:   // TCP Response Handling
-            return (on_tcp(data));
+            return (on_tcp(&data));
         case IPPROTO_UDP:   // UDP Response Handling
-            return (on_udp(data));
+            return (on_udp(&data));
         case IPPROTO_ICMP:  // ICMP Response Handling (for UDP and filtered ports)
-            return (on_icmp(data));
+            return (on_icmp(&data));
         default: return;
     }
 }

@@ -7,7 +7,7 @@ typedef struct s_state {
     size_t          scan_index;
     int             current_port;
     bool            ip_available;
-    struct in_addr  ip;
+    in_addr_t  ip;
     t_arguments     *args;
     bool            finish;
 } t_state;

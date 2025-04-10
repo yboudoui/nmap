@@ -8,33 +8,75 @@ OBJS_DIR = $(PROJECT_DIR)/objs
 INCS_DIR = $(PROJECT_DIR)/incs
 DEPS_DIR = $(PROJECT_DIR)/deps
 
+SRC_CLI_PARAMS = $(addprefix params/, \
+			file.c \
+			help.c \
+			ip.c \
+			port.c \
+			scan.c \
+			output_format.c \
+			speedup.c)
+
+SRC_CLI = $(addprefix cli/, \
+	$(SRC_CLI_PARAMS) \
+	cli.c \
+	utils.c)
+
+SRC_PACKET_GENERATOR_CHECKSUM = $(addprefix checksum/, \
+			ip.c \
+			tcp.c)
+
+SRC_PACKET_GENERATOR_HEADER = $(addprefix header/, \
+			ip.c \
+			tcp.c)
+
+SRC_PACKET_GENERATOR_SCAN_TYPE = $(addprefix scan_type/, \
+		ack.c \
+		fin.c \
+		null.c \
+		syn.c \
+		upd.c \
+		xmas.c)
+
+SRC_PACKET_GENERATOR = $(addprefix generator/, \
+	$(SRC_PACKET_GENERATOR_CHECKSUM) \
+	$(SRC_PACKET_GENERATOR_HEADER) \
+	$(SRC_PACKET_GENERATOR_SCAN_TYPE) \
+	pool.c)
+
+SRC_PACKET_LISTENER = $(addprefix listener/, \
+			packet.c \
+			listener.c \
+			tcp.c \
+			udp.c \
+			icmp.c)
+
+SRC_PACKET = $(addprefix packet/, \
+	$(SRC_PACKET_GENERATOR) \
+	$(SRC_PACKET_LISTENER))
+
+SRC_QUEUE = $(addprefix queue/, \
+			add.c \
+			count.c \
+			destroy.c \
+			find.c \
+			init.c \
+			print.c \
+			remove.c )
+
 SOURCES =	main.c \
-			pool.c \
-			packet/packet.c \
-			packet/tcp.c \
-			packet/udp.c \
-			packet/icmp.c \
-			cli/cli.c \
-			cli/utils.c \
-			cli/params/file.c \
-			cli/params/help.c \
-			cli/params/ip.c \
-			cli/params/port.c \
-			cli/params/scan.c \
-			cli/params/output_format.c \
-			cli/params/speedup.c \
-			queue/add.c \
-			queue/count.c \
-			queue/destroy.c \
-			queue/find.c \
-			queue/init.c \
-			queue/print.c \
-			queue/remove.c
+			$(SRC_QUEUE) \
+			$(SRC_PACKET) \
+			$(SRC_CLI)
 
 HEADER_FILES = 	cli.h \
 				cli_utils.h \
 				packet.h \
 				pool.h \
+				scan_type.h \
+				packet/header.h \
+				packet/checksum.h \
+				packet/scan_type.h \
 				queue.h
 
 SRCS = $(addprefix $(SRCS_DIR)/, $(SOURCES))
@@ -64,7 +106,6 @@ $(PROJECT): $(OBJS)
 	@$(CC) $(FLAG_WARNING) $(FLAG_DEBUG) $(OBJS) -o $@ $(FLAG_LIBS)
 
 $(OBJS_DIR)/%.o : $(SRCS_DIR)/%.c $(INCS_FILES)
-	@echo "Compiling $(notdir $<)..."
 	@mkdir -p $(dir $@)
 	@mkdir -p $(patsubst $(OBJS_DIR)/%,$(DEPS_DIR)/%,$(dir ./$(@:.o=.d)))
 	@$(CC) $(FLAGS) -c $< -o $@

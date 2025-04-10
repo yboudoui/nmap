@@ -21,3 +21,11 @@ int main(int ac, char *av[]) {
     // }
     return (0);
 }
+/*
+    RAW SOCKET
+    int s = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
+    if (s == -1) {
+        perror("socket");
+        return -1;
+    }
+*/

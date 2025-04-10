@@ -1,6 +1,6 @@
 #include "cli_utils.h"
 
-static bool parse_ip(char *str, struct in_addr *ip) {
+static bool parse_ip(char *str, in_addr_t *ip) {
     if (inet_pton(AF_INET, str, ip) != 1) {
         fprintf(stderr, "ERROR: malformed ip [%s]\n", str);
         return (false);
@@ -21,7 +21,7 @@ static bool parse_ip(char *str, struct in_addr *ip) {
 
 bool ip(t_arg_helper *args) {
     static size_t   once = 0;
-    struct in_addr  ip;
+    in_addr_t       ip;
 
     if (0
         || !call_me_once(&once, "--ip is already used")
