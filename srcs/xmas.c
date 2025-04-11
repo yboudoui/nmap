@@ -1,5 +1,3 @@
-#include "scan_type.h"
-
 #include <pcap.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -68,9 +66,9 @@ PacketNode *dequeue_packet() {
 }
 
 // Packet capture callback function (runs in capture thread)
-void packet_handler(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
-    enqueue_packet(header, packet);
-}
+// void packet_handler(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
+//     enqueue_packet(header, packet);
+// }
 
 // Packet processing function (Thread 2)
 void *process_packets(void *arg) {

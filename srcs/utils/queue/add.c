@@ -1,8 +1,8 @@
-#include "queue.h"
+#include "utils/queue.h"
 
 void queue_add(t_queue *list, void *data)
 {
-    t_node *new_node = malloc(sizeof(t_node));
+    t_node *new_node = calloc(1, sizeof(t_node));
     if (!new_node) return;
     
     new_node->data = data;

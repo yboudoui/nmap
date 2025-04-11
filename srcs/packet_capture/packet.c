@@ -1,15 +1,5 @@
-#include "pool.h"
-#include "packet.h"
-
-
-
-
-
-
-
-
-
-
+#include "pool/pool.h"
+#include "packet_capture/packet.h"
 
 t_packet    new_packet(unsigned char *user_data, const unsigned char *raw_packet)
 {

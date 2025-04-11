@@ -1,7 +1,8 @@
-#include "queue.h"
+#include "utils/queue.h"
 
 void queue_destroy(t_queue *list)
 {
+    if (!list) return;
     pthread_mutex_lock(&list->lock);
     
     t_node *current = list->head;
@@ -10,7 +11,6 @@ void queue_destroy(t_queue *list)
         free(current);
         current = next;
     }
-    
     pthread_mutex_unlock(&list->lock);
     pthread_mutex_destroy(&list->lock);
     free(list);

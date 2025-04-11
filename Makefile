@@ -58,6 +58,7 @@ SRC_POOL = \
 SRC_SCAN_TYPE_UTILS = \
 	checksum.c \
 	header_builds.c \
+	packet_switch.c \
 	print.c
 
 SRC_SCAN_TYPE_PACKET = \
@@ -91,8 +92,8 @@ SOURCES = \
 	$(addprefix scan_type/, $(SRC_SCAN_TYPE)) \
 	$(addprefix utils/, $(SRC_UTILS)) \
 	main.c \
-	queue.c \
-	xmas.c
+	
+# xmas.c
 
 OBJECTS := $(SOURCES:.c=.o)
 
@@ -112,13 +113,7 @@ SRCS = $(addprefix $(SRCS_DIR)/, $(SOURCES))
 OBJS = $(addprefix $(OBJS_DIR)/, $(OBJECTS))
 INCS = $(addprefix $(INCS_DIR)/, $(HEADERS))
 
-
-# OBJS := $(patsubst %, $(OBJS_DIR)/%, $(SOURCES:.c=.o))
-# OBJS := $(patsubst $(SRCS_DIR)/%, $(OBJS_DIR)/%, $(SRCS:.c=.o))
-
-# OBJS = $(patsubst $(SRCS_DIR)/%.c,$(OBJS_DIR)/%.o,$(patsubst $(SRCS_DIR)/%.s,$(OBJS_DIR)/%.o,$(SRCS)))
 DEPS = $(patsubst $(SRCS_DIR)/%.c,$(DEPS_DIR)/%.d,$(patsubst $(SRCS_DIR)/%.s,$(DEPS_DIR)/%.d,$(SRCS)))
-
 
 FLAG_DEBUG			= -g -ggdb3
 FLAG_WARNING		= -Wall -Wextra -Winline -Wformat
@@ -161,6 +156,11 @@ vagrant:
 	@vagrant up
 	@echo "Please add this setting to your ~/.ssh/config"
 	@vagrant ssh-config
+
+test:
+	valgrind \
+		--leak-check=full \
+		./ft_nmap --ports 80 --ip 127.56.0.1 --scan ACK SYN
 
 -include $(DEPS)
 

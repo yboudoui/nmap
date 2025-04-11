@@ -1,8 +1,9 @@
 #ifndef PACKET_H
 #define PACKET_H
 
-#include "scan_type.h"
-#include "queue.h"
+// #include "scan_type.h"
+#include "info.h"
+#include "utils/queue.h"
 
 typedef struct s_packet{
     void                *user_data;

@@ -1,23 +1,23 @@
-#include "packet.h"
+#include "packet_capture/packet.h"
 #include <netinet/tcp.h>
 
 static struct tcphdr *tcp_header_from_ip_header(struct iphdr* ip_header)
 {
     unsigned char   *data = (unsigned char*)ip_header;
-    unsigned short orig_iphdrlen = ip_header->ihl*4;
+    uint16_t orig_iphdrlen = ip_header->ihl*4;
     return (struct tcphdr *)(data + orig_iphdrlen);
 }
 
 static struct udphdr *udp_header_from_ip_header(struct iphdr* ip_header)
 {
     unsigned char   *data = (unsigned char*)ip_header;
-    unsigned short orig_iphdrlen = ip_header->ihl*4;
+    uint16_t orig_iphdrlen = ip_header->ihl*4;
     return (struct udphdr *)(data + orig_iphdrlen);
 }
 
 static void on_unreachable(t_icmp_info *info, t_packet *data)
 {
-    unsigned short src_port = 0;
+    uint16_t src_port = 0;
     // Get the original IP header from ICMP payload
     struct iphdr *orig_ip = (struct iphdr *)(info->header_ptr + 8);
 
@@ -47,7 +47,7 @@ static void on_timeout(t_icmp_info *info, t_packet *data)
         return;
     }
     struct tcphdr *orig_tcp = tcp_header_from_ip_header(orig_ip);
-    unsigned short src_port = ntohs(orig_tcp->dest);
+    uint16_t src_port = ntohs(orig_tcp->dest);
     printf("[%s Scan] Port %d is FILTERED (ICMP Time Exceeded)\n",
         "cur" /*scan_type_to_str(current_scan_type)*/,
         src_port

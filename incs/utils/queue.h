@@ -23,7 +23,7 @@ int         queue_count(t_queue *list);
 void        queue_destroy(t_queue *list);
 
 t_node*     queue_find(t_queue *list, int port);
-t_queue*    queue_init();
+t_queue*    queue_init(void);
 void        queue_print(t_queue *list, void (*fp_print_node_data)(void*));
 int         queue_remove(t_queue *list, bool (*fp_equal_node_data)(void*, void*), void *data);
 

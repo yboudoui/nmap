@@ -1,6 +1,6 @@
-#include "packet/header.h"
+#include "packet_capture/header.h"
 
-struct iphdr build_ip_header(unsigned short *datagram, uint32_t saddr, uint32_t daddr, uint8_t protocol)
+struct iphdr build_ip_header(uint8_t *datagram, uint32_t saddr, uint32_t daddr, uint8_t protocol)
 {
     struct iphdr ip_header = {0};
 
@@ -16,10 +16,9 @@ struct iphdr build_ip_header(unsigned short *datagram, uint32_t saddr, uint32_t 
     ip_header.daddr = daddr;
     
     // IP checksum
-    ip_header.check = tcp_checksum(
+    ip_header.check = ip_checksum(
         datagram,
-        ip_header.tot_len,
-        0, 0);
+        ip_header.tot_len);
     return (ip_header);
 }
 
@@ -28,11 +27,11 @@ struct tcphdr build_tcp_header(uint16_t dst_port, uint32_t saddr, uint32_t daddr
     struct tcphdr   header = {0};
 
     header.source = htons(12345); // Source port (random)
-    // tcph.source = htons(rand() % 65535); // Random source port TODO
+    // tcp_header.source = htons(rand() % 65535); // Random source port TODO
 
     header.dest = htons(dst_port);    // Destination port
     header.seq = htonl(1105024978); // Random sequence number
-    // tcph.seq = htonl(rand()); TODO
+    // tcp_header.seq = htonl(rand()); TODO
     header.ack_seq = 0;           // ACK sequence number
     header.doff = 5;              // Data offset (5 * 4 = 20 bytes)
     header.window = htons(5840);  // Maximum allowed window size
@@ -48,7 +47,7 @@ struct tcphdr build_tcp_header(uint16_t dst_port, uint32_t saddr, uint32_t daddr
     header.urg = (flags & URG_FLAG) ? 1 : 0;
 
     header.check = tcp_checksum(
-        (unsigned short *)&header,
+        (uint8_t *)&header,
         sizeof(struct tcphdr), 
         saddr, daddr);
     return (header);

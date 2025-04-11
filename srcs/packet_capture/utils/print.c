@@ -1,15 +1,20 @@
-void    print_mac_address(uint8_t ether_host[ETH_ALEN]) {
+#include "packet_capture/packet.h"
+
+void    print_mac_address(uint8_t ether_host[ETH_ALEN])
+{
     printf("MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
         ether_host[0], ether_host[1], ether_host[2],
         ether_host[3], ether_host[4], ether_host[5]);
 }
 
-void print_packet_header(const struct pcap_pkthdr *header) {
+void print_packet_header(const struct pcap_pkthdr *header)
+{
     printf("Timestamp: %ld.%ld seconds\n", header->ts.tv_sec, header->ts.tv_usec);
     printf("Packet Length: %d bytes\n", header->len);
 }
 
-void print_packet(struct ether_header *eth_header) {
+void print_packet(struct ether_header *eth_header)
+{
     print_mac_address(eth_header->ether_shost);
     print_mac_address(eth_header->ether_dhost);
 
@@ -20,8 +25,10 @@ void print_packet(struct ether_header *eth_header) {
     }
 }
 
-void packet_handler(uint8_t *args, const struct pcap_pkthdr *header, const uint8_t *packet) {
+void packet_handler(uint8_t *args, const struct pcap_pkthdr *header, const uint8_t *packet)
+{
+    (void)args;
     printf("\n--- Packet Captured ---\n");
     print_packet_header(header);
-    print_packet(packet);
+    print_packet((struct ether_header*)packet);
 }

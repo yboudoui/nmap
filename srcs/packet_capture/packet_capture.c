@@ -1,4 +1,4 @@
-#include "packet.h"
+#include "packet_capture/packet.h"
 
 static void packet_handler(unsigned char *user_data, const struct pcap_pkthdr *pkthdr, const unsigned char *packet)
 {

@@ -1,7 +1,9 @@
 #ifndef SCAN_TYPE_H
 #define SCAN_TYPE_H
 
-typedef enum e_scan_type {
+#include <stddef.h>
+typedef enum e_scan_type
+{
     SCAN_NONE  = 0,
     SCAN_SYN   = 1 << 0,
     SCAN_NULL  = 1 << 1,
@@ -18,5 +20,7 @@ typedef enum e_scan_type {
         | SCAN_XMAS
         | SCAN_UDP
 } t_scan_type;
+
+char* get_scan_flag_name(t_scan_type scan_type);
 
 #endif // SCAN_TYPE_H

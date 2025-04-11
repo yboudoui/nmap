@@ -1,22 +1,53 @@
+#include "pool/pool.h"
+#include "packet_capture/scan_type.h"
 
-int send_raw_packet(int raw_sock, const char *ip, int port)
+#include "unistd.h"
+
+int send_raw_packet(struct s_addr src, t_task task)
 {
-    char *packet;
-    int packet_len;
+    int                 sent;
+    t_fp_packet_builder builder;
+    uint8_t             packet_buf[4096] = {0};
+    uint32_t            packet_len;    
     
-    if (create_ack_packet(ip, port, &packet, &packet_len) != 0) {
+    builder = switch_packet_builder(task.scan_flag);
+    if (!builder) return (-1);
+    packet_len = builder(
+        packet_buf,
+        (struct s_req){
+            .dst = task.dst,
+            .src = src,
+        });
+
+    // Create destination address structure
+    struct sockaddr_in dest = {0};
+    dest.sin_family = AF_INET;
+    dest.sin_addr.s_addr = task.dst.ip;
+
+    // Create raw socket
+    int sock = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
+    if (sock < 0) {
+        perror("socket");
+        return (-1);
+    }
+
+    // Tell the socket we're providing the IP header
+    int one = 1;
+    if (setsockopt(sock, IPPROTO_IP, IP_HDRINCL, &one, sizeof(one)))
+    {
+        perror("setsockopt");
+        close(sock);
         return -1;
     }
 
-    struct sockaddr_in dest;
-    memset(&dest, 0, sizeof(dest));
-    dest.sin_family = AF_INET;
-    dest.sin_addr.s_addr = inet_addr(ip);
-    dest.sin_port = htons(port);
-
-    int sent = sendto(raw_sock, packet, packet_len, 0,
-                     (struct sockaddr *)&dest, sizeof(dest));
+    // Send the packet
+    sent = sendto(sock, packet_buf, packet_len, 0,
+        (struct sockaddr *)&dest, sizeof(dest));
     
-    free(packet);
-    return sent;
+    if (sent < 0) {
+        perror("sendto");
+    }
+
+    close(sock);
+    return (sent);
 }

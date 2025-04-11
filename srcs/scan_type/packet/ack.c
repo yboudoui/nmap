@@ -4,7 +4,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "packet/header.h"
+#include "packet_capture/header.h"
 
 /*
 How it Works:
@@ -13,24 +13,13 @@ How it Works:
     If the response is RST, the port is unfiltered (reachable but not necessarily open).
     If there is no response, the port is filtered (blocked by a firewall).
 */
-bool ack_packet(struct s_req req, struct s_raw_packet *raw_packet)
+
+uint32_t ack_packet(uint8_t *packet_buf, struct s_req req)
 {
-    if (raw_packet == NULL)
-    {
-        return (false);
-    }
-    uint16_t *datagram = calloc(sizeof(struct iphdr) + sizeof(struct tcphdr), sizeof(char));
-    if (datagram == NULL)
-    {
-        return (false);
-    }
-    struct iphdr ip_header = build_ip_header(datagram, req.src.ip, req.dst.ip, IPPROTO_TCP);
+    struct iphdr ip_header = build_ip_header(packet_buf, req.src.ip, req.dst.ip, IPPROTO_TCP);
     struct tcphdr tcp_header = build_tcp_header(req.dst.port, req.src.ip, req.dst.ip, ACK_FLAG);
 
-    memcpy(datagram, &ip_header, sizeof(struct iphdr));
-    memcpy(datagram + sizeof(struct iphdr), &tcp_header, sizeof(struct tcphdr));
-
-    raw_packet->packet = datagram;
-    raw_packet->packet_len = ip_header.tot_len;
-    return (true);
+    memcpy(packet_buf, &ip_header, sizeof(struct iphdr));
+    memcpy(packet_buf + sizeof(struct iphdr), &tcp_header, sizeof(struct tcphdr));
+    return (ip_header.tot_len);
 }

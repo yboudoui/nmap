@@ -1,4 +1,6 @@
-static char* get_scan_flag_name(t_scan_type scan_type)
+#include "scan_type/flags.h"
+
+char* get_scan_flag_name(t_scan_type scan_type)
 {
     switch (scan_type){
     case SCAN_SYN:  return ("SYN");

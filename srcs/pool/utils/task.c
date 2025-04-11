@@ -1,3 +1,5 @@
+#include "pool/pool.h"
+
 static bool get_next_ip(t_state *state, t_task *task) {
     char line[INET_ADDRSTRLEN];
 
@@ -7,7 +9,7 @@ static bool get_next_ip(t_state *state, t_task *task) {
 
     switch (state->args->ip_list.cmd) {
     case CMD_IP: {
-        task->ip = state->args->ip_list.data.ip;
+        task->dst.ip = state->args->ip_list.data.ip;
         state->ip_available = true;
         state->ip = state->args->ip_list.data.ip;
         state->finish = true;
@@ -21,7 +23,7 @@ static bool get_next_ip(t_state *state, t_task *task) {
             return (false);
         }
         line[strcspn(line, "\n")] = 0;
-        if (inet_pton(AF_INET, line, &task->ip) == 1) {
+        if (inet_pton(AF_INET, line, &task->dst.ip) == 1) {
             return (true); 
         } else {
             fprintf(stderr, "Invalid IP address format: %s\n", line); // TODO: Error handling
@@ -45,7 +47,7 @@ static bool get_next_port(t_state *state, t_task *task) {
     }
 
     if (state->current_port <= state->args->port_range[END]) {
-        task->port = state->current_port;
+        task->dst.port = state->current_port;
         state->current_port += 1;
         return (true);
     }
@@ -81,7 +83,8 @@ static bool get_next_scan_type(t_state *state, t_task *task) {
 #endif
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-static bool get_next_task(t_task *task, t_state *state) {
+bool get_next_task(t_task *task, t_state *state)
+{
     pthread_mutex_lock(&mutex);
 
     DEBUG("try get_next_scan_type\n");
@@ -103,7 +106,7 @@ static bool get_next_task(t_task *task, t_state *state) {
                 return (false);
             }
         } else {
-            task->ip = state->ip;
+            task->dst.ip = state->ip;
         }
         DEBUG("retry get_next_scan_type\n");
         if (!get_next_scan_type(state, task)) {
@@ -111,8 +114,8 @@ static bool get_next_task(t_task *task, t_state *state) {
             return (false);
         }
     }
-    task->ip = state->ip;
-    task->port = state->current_port;
+    task->dst.ip = state->ip;
+    task->dst.port = state->current_port;
     pthread_mutex_unlock(&mutex);
     return (true);
 }

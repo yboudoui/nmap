@@ -1,8 +1,8 @@
-#include "packet.h"
+#include "packet_capture/packet.h"
 
 void on_udp(t_packet *data)
 {
-    unsigned short src_port, dst_port;
+    uint16_t src_port, dst_port;
 
     t_udp_info info = build_udp_info(data->raw_packet, data->ip);
     src_port = ntohs(info.header->source);

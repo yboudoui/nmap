@@ -1,6 +1,6 @@
-#include "packet/checksum.h"
+#include "packet_capture/checksum.h"
 
-uint16_t ip_checksum(uint16_t *buf, int nwords)
+uint16_t ip_checksum(uint8_t *buf, int nwords)
 {
     uint64_t sum = 0;
     for (; nwords > 0; nwords--)
@@ -10,7 +10,7 @@ uint16_t ip_checksum(uint16_t *buf, int nwords)
     return (uint16_t)(~sum);
 }
 
-uint16_t tcp_checksum(uint16_t *ptr, int nbytes, uint64_t src_addr, uint64_t dest_addr)
+uint16_t tcp_checksum(uint8_t *ptr, int nbytes, uint64_t src_addr, uint64_t dest_addr)
 {
     uint64_t sum;
     uint16_t oddbyte;
