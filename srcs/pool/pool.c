@@ -23,17 +23,13 @@ bool pool(t_arguments *args, t_fp_callback user_callback, void *user_data)
     };
     size_t threads_count = args->speedup;
     pthread_t	*threads = calloc(threads_count, sizeof(pthread_t));
-    if (threads == NULL)
-    {
-        return (false);
-    }
-    for(size_t i = 0; i < threads_count; i++)
-    {
+    if (threads == NULL) return (false);
+
+    for(size_t i = 0; i < threads_count; i++) {
         pthread_create(&threads[i], NULL, routine, &pool_state);
     }
     user_callback(user_data);
-    for(size_t i = 0; i < threads_count; i++)
-    {
+    for(size_t i = 0; i < threads_count; i++) {
 		pthread_join(threads[i], NULL);
     }
     return (free(threads), true);
