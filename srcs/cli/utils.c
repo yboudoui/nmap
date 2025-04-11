@@ -1,4 +1,4 @@
-#include "cli_utils.h"
+#include "cli/utils.h"
 #include <string.h>
 
 inline bool shift_args_by(t_arg_helper* args, int n) {

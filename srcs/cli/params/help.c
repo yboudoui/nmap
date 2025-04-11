@@ -1,4 +1,4 @@
-#include "cli_utils.h"
+#include "cli/utils.h"
 
 void show_help(void) {
     static size_t once = 0;

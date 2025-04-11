@@ -1,4 +1,4 @@
-#include "cli_utils.h"
+#include "cli/utils.h"
 
 bool speedup(t_arg_helper *args) {
     size_t          speedup;

@@ -1,4 +1,4 @@
-#include "cli_utils.h"
+#include "cli/utils.h"
 
 static bool parse_ip(char *str, in_addr_t *ip) {
     if (inet_pton(AF_INET, str, ip) != 1) {

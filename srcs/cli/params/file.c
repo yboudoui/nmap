@@ -1,4 +1,4 @@
-#include "cli_utils.h"
+#include "cli/utils.h"
 
 static bool file_open(char *file_path, FILE **fs) {
     (*fs) = fopen(file_path, "r");

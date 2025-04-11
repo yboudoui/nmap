@@ -1,4 +1,4 @@
-#include "cli_utils.h"
+#include "cli/utils.h"
 
 #include <string.h>
 
