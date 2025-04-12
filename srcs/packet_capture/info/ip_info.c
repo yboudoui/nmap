@@ -1,6 +1,6 @@
 #include "packet_capture/info.h"
 
-t_ip_info   build_ip_info(const unsigned char *raw_packet, t_eth_info eth_info)
+t_ip_info   build_ip_info(const uint8_t *raw_packet, t_eth_info eth_info)
 {
     (void)raw_packet;
     t_ip_info   info = {0};

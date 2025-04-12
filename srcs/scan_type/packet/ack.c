@@ -14,7 +14,7 @@ How it Works:
     If there is no response, the port is filtered (blocked by a firewall).
 */
 
-uint32_t ack_packet(uint8_t *packet_buf, struct s_req req)
+uint32_t ack_packet(uint8_t *packet_buf, t_req req)
 {
     struct iphdr ip_header = build_ip_header(packet_buf, req.src.ip, req.dst.ip, IPPROTO_TCP);
     struct tcphdr tcp_header = build_tcp_header(req.dst.port, req.src.ip, req.dst.ip, ACK_FLAG);

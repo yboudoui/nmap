@@ -20,8 +20,8 @@ uint16_t tcp_checksum(uint8_t *ptr, int nbytes, uint64_t src_addr, uint64_t dest
     struct pseudo_header {
         unsigned int source_address;
         unsigned int dest_address;
-        unsigned char placeholder;
-        unsigned char protocol;
+        uint8_t placeholder;
+        uint8_t protocol;
         uint16_t tcp_length;
     } pheader;
 
@@ -44,7 +44,7 @@ uint16_t tcp_checksum(uint8_t *ptr, int nbytes, uint64_t src_addr, uint64_t dest
 
     if (nbytes == 1) {
         oddbyte = 0;
-        *((unsigned char*)&oddbyte) = *(unsigned char*)ptr;
+        *((uint8_t*)&oddbyte) = *(uint8_t*)ptr;
         sum += oddbyte;
     }
 

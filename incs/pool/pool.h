@@ -1,31 +1,27 @@
 #ifndef POOL_H
 #define POOL_H
 
-#include "cli/cli.h"
-#include "task_generator.h"
+#include "nmap_data.h"
+#include "packet_capture/scan_type.h"
 
-struct s_addr
-{
-    in_addr_t   ip;
-    uint32_t    port;
-};
+typedef struct s_task_state {
+    size_t          scan_index;
+    int             current_port;
+    bool            ip_available;
+    in_addr_t       ip;
+    bool            finish;
+    
+    void            *user_data;
+} t_task_state;
 
 typedef struct s_task {
-    t_scan_type     scan_flag;
-    struct s_addr   dst;
+    t_fp_packet_builder packet_builder;
+    t_scan_type         scan_flag;
+    struct s_addr       dst;
 } t_task;
 
-typedef bool    (t_fp_callback)(void*);
-bool pool(t_arguments *args, t_fp_callback user_callback, void *user_data);
-
-struct s_req
-{
-    struct s_addr   src;
-    struct s_addr   dst;
-};
-
-void print_task(t_task task);
-int send_raw_packet(struct s_addr src, t_task task);
-bool get_next_task(t_task *task, t_state *state);
+void    print_task(t_task task);
+bool    get_next_task(t_task *task, t_task_state *state);
+t_error send_packets_pool(void *user_data);
 
 #endif // POOL_H

@@ -1,6 +1,6 @@
 #include "packet_capture/info.h"
 
-t_eth_info  build_eth_info(const unsigned char *raw_packet)
+t_eth_info  build_eth_info(const uint8_t *raw_packet)
 {
     t_eth_info   info = {0};
 

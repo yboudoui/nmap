@@ -1,23 +1,26 @@
 #include "pool/pool.h"
 
-static bool get_next_ip(t_state *state, t_task *task) {
-    char line[INET_ADDRSTRLEN];
+static bool get_next_ip(t_task_state *state, t_task *task)
+{
+    char                line[INET_ADDRSTRLEN];
+    t_nmap_data         *nmap_data = state->user_data;
+    struct s_ip_list    ip_list = nmap_data->args.ip_list;
 
     if (state->finish) {
         return (false);
     }
 
-    switch (state->args->ip_list.cmd) {
+    switch (ip_list.cmd) {
     case CMD_IP: {
-        task->dst.ip = state->args->ip_list.data.ip;
+        task->dst.ip = ip_list.data.ip;
         state->ip_available = true;
-        state->ip = state->args->ip_list.data.ip;
+        state->ip = ip_list.data.ip;
         state->finish = true;
         return (true);
     }
     case CMD_FILE: {
-        if (!fgets(line, sizeof(line), state->args->ip_list.data.fs)) {
-            fclose(state->args->ip_list.data.fs);
+        if (!fgets(line, sizeof(line), ip_list.data.fs)) {
+            fclose(ip_list.data.fs);
             state->ip_available = true;
             state->current_port = 0;
             return (false);
@@ -39,14 +42,19 @@ static bool get_next_ip(t_state *state, t_task *task) {
     }
 }
 
-static bool get_next_port(t_state *state, t_task *task) {    
-    if (state->ip_available == false) return (false);
+static bool get_next_port(t_task_state *state, t_task *task)
+{
+    t_nmap_data *nmap_data = state->user_data;
 
-    if (state->current_port == 0) {
-        state->current_port = state->args->port_range[START];
+    if (state->ip_available == false) {
+        return (false);
     }
 
-    if (state->current_port <= state->args->port_range[END]) {
+    if (state->current_port == 0) {
+        state->current_port = nmap_data->args.port_range[START];
+    }
+
+    if (state->current_port <= nmap_data->args.port_range[END]) {
         task->dst.port = state->current_port;
         state->current_port += 1;
         return (true);
@@ -55,8 +63,34 @@ static bool get_next_port(t_state *state, t_task *task) {
     return (false);
 }
 
-static bool get_next_scan_type(t_state *state, t_task *task) {
-    if (state->current_port == 0) return (false);
+static t_fp_packet_builder switch_packet_builder(t_scan_type type)
+{
+    switch (type)
+    {
+    case SCAN_SYN:
+        return (syn_packet);
+    case SCAN_NULL:
+        return (null_packet);
+    case SCAN_ACK:
+        return (ack_packet);
+    case SCAN_FIN:
+        return (fin_packet);
+    case SCAN_XMAS:
+        return (xmas_packet);
+    case SCAN_UDP:
+        return (udp_packet);
+    default:
+        return (NULL);
+    }
+}
+
+static bool get_next_scan_type(t_task_state *state, t_task *task)
+{
+    t_nmap_data *nmap_data = state->user_data;
+
+    if (state->current_port == 0) {
+        return (false);
+    }
     
     static const t_scan_type    all[] =  {
         SCAN_SYN, SCAN_NULL, SCAN_ACK,
@@ -64,8 +98,9 @@ static bool get_next_scan_type(t_state *state, t_task *task) {
         SCAN_NONE,
     };
     while(all[state->scan_index] != SCAN_NONE) {
-        if (state->args->scan_flags & all[state->scan_index]) {
+        if (nmap_data->args.scan_flags & all[state->scan_index]) {
             task->scan_flag = all[state->scan_index];
+            task->packet_builder = switch_packet_builder(task->scan_flag);
             state->scan_index += 1;
             return (true);
         }
@@ -83,7 +118,7 @@ static bool get_next_scan_type(t_state *state, t_task *task) {
 #endif
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-bool get_next_task(t_task *task, t_state *state)
+bool get_next_task(t_task *task, t_task_state *state)
 {
     pthread_mutex_lock(&mutex);
 

@@ -3,14 +3,14 @@
 
 static struct tcphdr *tcp_header_from_ip_header(struct iphdr* ip_header)
 {
-    unsigned char   *data = (unsigned char*)ip_header;
+    uint8_t   *data = (uint8_t*)ip_header;
     uint16_t orig_iphdrlen = ip_header->ihl*4;
     return (struct tcphdr *)(data + orig_iphdrlen);
 }
 
 static struct udphdr *udp_header_from_ip_header(struct iphdr* ip_header)
 {
-    unsigned char   *data = (unsigned char*)ip_header;
+    uint8_t   *data = (uint8_t*)ip_header;
     uint16_t orig_iphdrlen = ip_header->ihl*4;
     return (struct udphdr *)(data + orig_iphdrlen);
 }

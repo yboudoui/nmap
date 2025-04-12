@@ -8,7 +8,7 @@ How it Works:
     If the port is closed, it sends an RST.
     If filtered, there’s no response or an ICMP unreachable message.
 */
-uint32_t null_packet(uint8_t *packet_buf, struct s_req req)
+uint32_t null_packet(uint8_t *packet_buf, t_req req)
 {
     struct iphdr ip_header = build_ip_header(packet_buf, req.src.ip, req.dst.ip, IPPROTO_TCP);
     struct tcphdr tcp_header = build_tcp_header(req.dst.port, req.src.ip, req.dst.ip, 0);

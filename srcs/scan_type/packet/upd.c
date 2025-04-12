@@ -8,7 +8,7 @@ How it Works:
     If the port is closed, an ICMP Port Unreachable message is received.
     If filtered, no response or ICMP unreachable errors may be received.
 */
-uint32_t udp_packet(uint8_t *packet_buf, struct s_req req)
+uint32_t udp_packet(uint8_t *packet_buf, t_req req)
 {
     struct iphdr ip_header = build_ip_header(packet_buf, req.src.ip, req.dst.ip, IPPROTO_UDP);
     

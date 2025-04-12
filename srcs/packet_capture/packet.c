@@ -1,7 +1,6 @@
-#include "pool/pool.h"
 #include "packet_capture/packet.h"
 
-t_packet    new_packet(unsigned char *user_data, const unsigned char *raw_packet)
+t_packet    new_packet(uint8_t *user_data, const uint8_t *raw_packet)
 {
     t_packet  data;
     data.user_data = user_data;
@@ -11,7 +10,7 @@ t_packet    new_packet(unsigned char *user_data, const unsigned char *raw_packet
     return (data);
 }
 
-void        save_result(t_packet *data, void *result)
+void save_result(t_packet *data, void *result)
 {
-    queue_add(data->user_data, result);
+    queue_push_front(data->user_data, result);
 }

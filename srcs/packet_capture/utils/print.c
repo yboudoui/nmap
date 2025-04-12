@@ -25,7 +25,7 @@ void print_packet(struct ether_header *eth_header)
     }
 }
 
-void packet_handler(uint8_t *args, const struct pcap_pkthdr *header, const uint8_t *packet)
+void packet_handler_old(uint8_t *args, const struct pcap_pkthdr *header, const uint8_t *packet)
 {
     (void)args;
     printf("\n--- Packet Captured ---\n");

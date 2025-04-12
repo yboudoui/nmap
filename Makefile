@@ -31,8 +31,12 @@ SRC_PACKET_CAPTURE_INFO = \
 	udp_info.c
 
 SRC_PACKET_CAPTURE_LISTENER = \
+	ack.c \
+	fin.c \
+	null.c \
+	syn.c \
+	xmas.c \
 	icmp.c \
-	tcp.c \
 	udp.c
 
 SRC_PACKET_CAPTURE_UTILS = \
@@ -43,6 +47,7 @@ SRC_PACKET_CAPTURE = \
 	$(addprefix listener/, $(SRC_PACKET_CAPTURE_LISTENER)) \
 	$(addprefix utils/, $(SRC_PACKET_CAPTURE_UTILS)) \
 	packet.c \
+	handler.c \
 	packet_capture.c
 
 
@@ -52,13 +57,11 @@ SRC_POOL_UTILS = \
 
 SRC_POOL = \
 	$(addprefix utils/, $(SRC_POOL_UTILS)) \
-	pool.c \
-	send.c
+	pool.c 
 
 SRC_SCAN_TYPE_UTILS = \
 	checksum.c \
 	header_builds.c \
-	packet_switch.c \
 	print.c
 
 SRC_SCAN_TYPE_PACKET = \
@@ -73,17 +76,10 @@ SRC_SCAN_TYPE = \
 	$(addprefix utils/, $(SRC_SCAN_TYPE_UTILS)) \
 	$(addprefix packet/, $(SRC_SCAN_TYPE_PACKET)) \
 
-SRC_UTILS_QUEUE = \
-	add.c \
-	count.c \
-	destroy.c \
-	find.c \
-	init.c \
-	print.c \
-	remove.c
-
 SRC_UTILS = \
-	$(addprefix queue/, $(SRC_UTILS_QUEUE))
+	error.c \
+	node.c \
+	queue.c \
 
 SOURCES = \
 	$(addprefix cli/, $(SRC_CLI)) \
@@ -91,6 +87,9 @@ SOURCES = \
 	$(addprefix pool/, $(SRC_POOL)) \
 	$(addprefix scan_type/, $(SRC_SCAN_TYPE)) \
 	$(addprefix utils/, $(SRC_UTILS)) \
+	nmap_data.c \
+	threads.c \
+	socket.c \
 	main.c \
 	
 # xmas.c
@@ -106,6 +105,10 @@ HEADERS = \
 	packet/header.h \
 	packet/checksum.h \
 	packet/scan_type.h \
+	nmap_error.h \
+	nmap_data.h \
+	nmap_threads.h \
+	node.h \
 	queue.h
 
 
@@ -121,9 +124,6 @@ FLAG_DEPENDENCIES	= -MMD -MF $(patsubst $(SRCS_DIR)/%,$(DEPS_DIR)/%,./$(<:.c=.d)
 FLAG_INCS			= -I $(INCS_DIR)
 FLAG_LIBS			= -lpthread -lpcap
 FLAGS				= $(FLAG_INCS) $(FLAG_DEPENDENCIES) $(FLAG_DEBUG) $(FLAG_WARNING)
-
-gg: 
-	@echo $(OBJS)
 
 all: $(PROJECT)
 	@if echo $$SHELL | grep "zsh" > /dev/null 2>&1; then \
