@@ -160,7 +160,7 @@ vagrant:
 test:
 	valgrind \
 		--leak-check=full \
-		./ft_nmap --ports 80-81 --ip 127.56.0.1 --scan ACK SYN
+		./ft_nmap --ports 80-81 --ip 127.0.0.1 --scan ACK SYN
 
 -include $(DEPS)
 

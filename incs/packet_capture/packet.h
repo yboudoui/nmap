@@ -6,11 +6,11 @@
 #include "utils/error.h"
 
 typedef struct s_packet{
-    void                *user_data;
-    const uint8_t *raw_packet;
-    t_eth_info  eth;
-    t_ip_info   ip;
-    t_tcp_info  tcp;
+    void            *user_data;
+    const uint8_t   *raw_packet;
+    t_eth_info      eth;
+    t_ip_info       ip;
+    t_tcp_info      tcp;
 } t_packet;
 
 t_packet    new_packet(uint8_t *user_data, const uint8_t *raw_packet);
@@ -28,8 +28,9 @@ void on_icmp(t_packet *data);
 void on_udp(t_packet *data);
 
 typedef struct s_pcap_data_wraper {
-    pcap_t  *handle;
-    void    *user_data;
+    pcap_t          *handle;
+    struct in_addr  device_addr;
+    void            *user_data;
 } t_pcap_data_wraper;
 void packet_handler(uint8_t *user_data, const struct pcap_pkthdr *pkthdr, const uint8_t *packet);
 t_error capture_packet(t_error (*user_callback)(void*), void *data);

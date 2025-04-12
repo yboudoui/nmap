@@ -27,7 +27,21 @@ static void    on_tcp(t_packet *data)
     }
 }
 
+#include <net/ethernet.h>
 #include "pool/pool.h" // TODO: 1 remove it
+
+static int find_ip(void *incomming, void *t)
+{
+    struct in_addr  *src = t;
+    t_task          *task = incomming;
+    struct in_addr  dst = {
+        .s_addr = task->dst.ip,
+    };
+
+    printf("f src: %s dst: %s\n", inet_ntoa(*src), inet_ntoa(dst));
+    return (src->s_addr == dst.s_addr);
+}
+
 void packet_handler(uint8_t *user_data, const struct pcap_pkthdr *pkthdr, const uint8_t *packet)
 {
     (void)pkthdr;
@@ -40,12 +54,24 @@ void packet_handler(uint8_t *user_data, const struct pcap_pkthdr *pkthdr, const 
         pcap_breakloop(wraper->handle);
         return ;
     }
-    printf("yoo %d\n", count);
-    queue_delete_front(nd->queue.in, free);
-
     t_packet  data = new_packet((void*)nd, packet);
+    if (data.eth.type != ETHERTYPE_IP) {
+        return;
+    }
+    // printf("IPv4 address: %s\n", inet_ntoa(wraper->device_addr)); // print the ip addr of the device
+    // printf("Destination IP: %s\n", inet_ntoa(data.ip.ip->ip_dst));
+    if (data.ip.ip->ip_dst.s_addr != wraper->device_addr.s_addr) {
+        return;
+    }
+    t_node *found = queue_find_data(nd->queue.in, &data.ip.ip->ip_src, find_ip);
+    // printf("yo %d %p %s\n", count, found, inet_ntoa(data.ip.ip->ip_src));
+    if (!found) {
+        return;
+    }
+    queue_remove_node(nd->queue.in, found);
+    printf("Source IP: %s\n", inet_ntoa(data.ip.ip->ip_src));
+    return;
 
-    // if (data.eth.type != ETHERTYPE_IP) return;
     switch (data.ip.header->protocol)
     {
         case IPPROTO_TCP:   // TCP Response Handling

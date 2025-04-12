@@ -35,7 +35,7 @@ static void* routine(void *data)
         int sent = sendto(nd->sock, packet_buf, packet_len, 0, (struct sockaddr *)&dest, sizeof(dest));
         if (sent < 0) {}
 
-        // print_task(task);
+        print_task(task);
     }
     return (NULL);
 }

@@ -20,6 +20,35 @@ static t_error  ft_pcap_find_devices(pcap_if_t **devices)
     return (error);
 }
 
+static bool device_filter_flag(int flags)
+{
+    return (0
+        || !(flags & PCAP_IF_UP)
+        || !(flags & PCAP_IF_RUNNING)
+        || ((flags & PCAP_IF_CONNECTION_STATUS) == PCAP_IF_CONNECTION_STATUS_DISCONNECTED)
+    );
+}
+
+static t_error  ft_pcap_select_device(pcap_if_t **devices, pcap_addr_t **addresse)
+{
+    t_error error = 0;
+
+    pcap_if_t *dev = (*devices);
+    for (; dev; dev = dev->next) {
+        if (device_filter_flag(dev->flags)) {
+            continue;
+        }
+        pcap_addr_t *addr = dev->addresses;
+        for (; addr; addr = addr->next) {
+            if (addr->addr->sa_family == AF_INET) {
+                (*addresse) = addr;
+                return (error);
+            }
+        }
+    }
+    return (err_wrap(&error, 1, "no usable device found"));
+}
+
 static t_error  ft_pcap_create_handle(pcap_if_t *devices, pcap_t **handle)
 {
     char    errbuf[PCAP_ERRBUF_SIZE];
@@ -27,7 +56,6 @@ static t_error  ft_pcap_create_handle(pcap_if_t *devices, pcap_t **handle)
 
     (*handle) = pcap_create(devices->name, errbuf);
     if (handle == NULL) {
-        pcap_freealldevs(devices);
         error = 1;
         fprintf(stderr, "Error opening device: %s\n", errbuf);
         // err_wrap(&error, 1, "opening device");
@@ -50,7 +78,6 @@ static t_error  ft_pcap_set_handle(pcap_t *handle)
     // Essential for scanning
     pcap_set_promisc(handle, 1);       // Promiscuous mode
     pcap_set_snaplen(handle, 65535);   // Full packet capture
-    pcap_set_timeout(handle, 1000);    // 1s timeout
 
     // Advanced optimizations (if supported)
     pcap_set_immediate_mode(handle, 1);      // Reduce latency
@@ -83,41 +110,39 @@ static void     ft_pcap_clean(pcap_t **handle, pcap_if_t **devices)
     }
 }
 
-static t_error  ft_pcap_init(pcap_if_t **devices, pcap_t **handle)
+static t_error  ft_pcap_init(pcap_if_t **devices, pcap_t **handle, pcap_addr_t **addr)
 {
     (*devices) = NULL;
     (*handle) = NULL;
+    (*addr) = NULL;
     t_error error = 0;
 
     error = ft_pcap_find_devices(devices);
     if (error) {
-        error = WRAP_ERROR(error, 1);
-        fprintf(stderr, "ERROR [%d]: unable to find devices for capturing packets\n", error);
-        return (error);
+        return (err_wrap(&error, 1, "unable to find any devices for capturing packets"));
+    }
+
+    error = ft_pcap_select_device(devices, addr);
+    if (error) {
+        return (err_wrap(&error, 2, "unable to find a usable devices for capturing packets"));
     }
 
     error = ft_pcap_create_handle(*devices, handle);
     if (error) {
         ft_pcap_clean(handle, devices);
-        error = WRAP_ERROR(error, 2);
-        fprintf(stderr, "ERROR [%d]: unable to create a handle for capturing packets\n", error);
-        return (error);
+        return (err_wrap(&error, 3, "unable to create a handle for capturing packets"));
     }
 
     error = ft_pcap_set_handle(*handle);
     if (error) {
         ft_pcap_clean(handle, devices);
-        error = WRAP_ERROR(error, 3);
-        fprintf(stderr, "ERROR [%d]: unable to set the handle for capturing packets\n", error);
-        return (error);
+        return (err_wrap(&error, 4, "unable to set the handle for capturing packets"));
     }
 
     error = ft_pcap_activate_handle(*handle);
     if (error) {
         ft_pcap_clean(handle, devices);
-        error = WRAP_ERROR(error, 4);
-        fprintf(stderr, "ERROR [%d]: unable to activate the handle for capturing packets\n", error);
-        return (error);
+        return (err_wrap(&error, 5, "unable to activate the handle for capturing packets"));
     }
     return (error);
 }
@@ -125,6 +150,7 @@ static t_error  ft_pcap_init(pcap_if_t **devices, pcap_t **handle)
 static void *ft_pcap_routine(void *user_data)
 {
     t_pcap_data_wraper  *wrapper = user_data;
+
     int pcap_loop_error = pcap_loop(
         wrapper->handle,
         MAX_PACKET_PROCESSED,
@@ -141,23 +167,27 @@ t_error capture_packet(t_error (*user_callback)(void*), void *user_data)
 {
     pcap_if_t   *devices = NULL;
     pcap_t      *handle = NULL;
+    pcap_addr_t *addr = NULL;
+    t_error     error = 0;
 
-    t_error error = ft_pcap_init(&devices, &handle);
+    error = ft_pcap_init(&devices, &handle, &addr);
     if (error) {
         return (err_wrap(&error, 1, "unable to init the capture packets"));
     }
 
-    pthread_t   thread = {0};
+    pthread_t           thread = {0};
     t_pcap_data_wraper  wraper = {
         .handle = handle,
+        .device_addr = ((struct sockaddr_in *)addr->addr)->sin_addr,
         .user_data = user_data,
     };
-    t_error user_callback_success = 0;
+
+    printf("looking for packets\n");
     pthread_create(&thread, NULL, ft_pcap_routine, &wraper);
     printf("sending start\n");
-    user_callback_success = user_callback(user_data);
+    error = user_callback(user_data);
     printf("sending stop\n");
     pthread_join(thread, NULL);
     ft_pcap_clean(&handle, &devices);
-    return (user_callback_success);
+    return (error);
 }
