@@ -80,6 +80,7 @@ SRC_UTILS = \
 	error.c \
 	node.c \
 	queue.c \
+	threads.c
 
 SOURCES = \
 	$(addprefix cli/, $(SRC_CLI)) \
@@ -88,7 +89,6 @@ SOURCES = \
 	$(addprefix scan_type/, $(SRC_SCAN_TYPE)) \
 	$(addprefix utils/, $(SRC_UTILS)) \
 	nmap_data.c \
-	threads.c \
 	socket.c \
 	main.c \
 	
@@ -105,11 +105,11 @@ HEADERS = \
 	packet/header.h \
 	packet/checksum.h \
 	packet/scan_type.h \
-	nmap_error.h \
-	nmap_data.h \
-	nmap_threads.h \
-	node.h \
-	queue.h
+	utils/error.h \
+	utils/threads.h \
+	utils/node.h \
+	utils/queue.h \
+	nmap_data.h 
 
 
 SRCS = $(addprefix $(SRCS_DIR)/, $(SOURCES))
@@ -160,7 +160,7 @@ vagrant:
 test:
 	valgrind \
 		--leak-check=full \
-		./ft_nmap --ports 80 --ip 127.56.0.1 --scan ACK SYN
+		./ft_nmap --ports 80-81 --ip 127.56.0.1 --scan ACK SYN
 
 -include $(DEPS)
 

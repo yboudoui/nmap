@@ -1,4 +1,4 @@
-#include "nmap_threads.h"
+#include "utils/threads.h"
 #include <stdlib.h>
 #include <pthread.h>
 

@@ -1,6 +1,6 @@
 #include "packet_capture/packet.h"
 
-#define MAX_PACKET_PROCESSED 10
+#define MAX_PACKET_PROCESSED 0
 
 static t_error  ft_pcap_find_devices(pcap_if_t **devices)
 {

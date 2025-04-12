@@ -3,7 +3,7 @@
 
 #include "info.h"
 #include "utils/queue.h"
-#include "nmap_error.h"
+#include "utils/error.h"
 
 typedef struct s_packet{
     void                *user_data;

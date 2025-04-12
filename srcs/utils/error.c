@@ -1,4 +1,4 @@
-#include "nmap_error.h"
+#include "utils/error.h"
 
 t_error err_wrap(t_error *error, t_error wrap, const char *msg)
 {

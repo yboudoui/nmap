@@ -1,5 +1,5 @@
 #include "pool/pool.h"
-#include "nmap_threads.h"
+#include "utils/threads.h"
 
 void    *memdup(void *src, size_t size)
 {

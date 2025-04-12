@@ -4,7 +4,7 @@
 #include "cli/cli.h"
 #include "utils/queue.h"
 #include "socket.h"
-#include "nmap_error.h"
+#include "utils/error.h"
 
 typedef struct s_nmap_data {
     t_arguments args;
