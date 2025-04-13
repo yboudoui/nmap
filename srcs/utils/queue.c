@@ -326,7 +326,7 @@ t_node *queue_find_data(t_queue *queue, void *data_ptr, int (*cmp)(void *, void 
         current = current->next;
     }
     pthread_mutex_unlock(&queue->lock);
-    return current;
+    return (current);
 }
 
 /**

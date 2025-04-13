@@ -28,17 +28,6 @@ static t_error set_sock_option(int *sock)
     return (error);
 }
 
-static t_error get_sock_address(int sockfd, struct sockaddr_in *local_addr)
-{
-    t_error error = 0;
-
-    socklen_t addr_len = sizeof(struct sockaddr_in);
-    if (getsockname(sockfd, (struct sockaddr *)local_addr, &addr_len) < 0) {
-        return (err_wrap(&error, 1, "unable to get the socket info for sending packets"));
-    }
-    return (error);
-}
-
 t_error init_sock(int *sock)
 {
     t_error error = 0;

@@ -20,18 +20,13 @@ struct s_addr {
     uint32_t    port;
 };
 
-typedef struct s_req {
-    struct s_addr   src;
-    struct s_addr   dst;
-} t_req;
+uint32_t ack_packet (uint8_t *packet_buf, in_addr_t src_ip, in_addr_t dst_ip, uint32_t dst_port);
+uint32_t fin_packet (uint8_t *packet_buf, in_addr_t src_ip, in_addr_t dst_ip, uint32_t dst_port);
+uint32_t null_packet(uint8_t *packet_buf, in_addr_t src_ip, in_addr_t dst_ip, uint32_t dst_port);
+uint32_t syn_packet (uint8_t *packet_buf, in_addr_t src_ip, in_addr_t dst_ip, uint32_t dst_port);
+uint32_t udp_packet (uint8_t *packet_buf, in_addr_t src_ip, in_addr_t dst_ip, uint32_t dst_port);
+uint32_t xmas_packet(uint8_t *packet_buf, in_addr_t src_ip, in_addr_t dst_ip, uint32_t dst_port);
 
-uint32_t ack_packet(uint8_t *packet_buf, t_req req);
-uint32_t fin_packet(uint8_t *packet_buf, t_req req);
-uint32_t null_packet(uint8_t *packet_buf, t_req req);
-uint32_t syn_packet(uint8_t *packet_buf, t_req req);
-uint32_t udp_packet(uint8_t *packet_buf, t_req req);
-uint32_t xmas_packet(uint8_t *packet_buf, t_req req);
-
-typedef uint32_t (*t_fp_packet_builder)(uint8_t*, t_req);
+typedef uint32_t (*t_fp_packet_builder)(uint8_t *packet_buf, in_addr_t src_ip, in_addr_t dst_ip, uint32_t dst_port);
 
 #endif // PACKET_SCAN_TYPE_H

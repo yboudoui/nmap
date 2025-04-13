@@ -12,7 +12,7 @@ static bool get_next_ip(t_task_state *state, t_task *task)
 
     switch (ip_list.cmd) {
     case CMD_IP: {
-        task->dst.ip = ip_list.data.ip;
+        task->ip = ip_list.data.ip;
         state->ip_available = true;
         state->ip = ip_list.data.ip;
         state->finish = true;
@@ -26,7 +26,7 @@ static bool get_next_ip(t_task_state *state, t_task *task)
             return (false);
         }
         line[strcspn(line, "\n")] = 0;
-        if (inet_pton(AF_INET, line, &task->dst.ip) == 1) {
+        if (inet_pton(AF_INET, line, &task->ip) == 1) {
             return (true); 
         } else {
             fprintf(stderr, "Invalid IP address format: %s\n", line); // TODO: Error handling
@@ -55,7 +55,7 @@ static bool get_next_port(t_task_state *state, t_task *task)
     }
 
     if (state->current_port <= nmap_data->args.port_range[END]) {
-        task->dst.port = state->current_port;
+        task->port = state->current_port;
         state->current_port += 1;
         return (true);
     }
@@ -141,7 +141,7 @@ bool get_next_task(t_task *task, t_task_state *state)
                 return (false);
             }
         } else {
-            task->dst.ip = state->ip;
+            task->ip = state->ip;
         }
         DEBUG("retry get_next_scan_type\n");
         if (!get_next_scan_type(state, task)) {
@@ -149,8 +149,8 @@ bool get_next_task(t_task *task, t_task_state *state)
             return (false);
         }
     }
-    task->dst.ip = state->ip;
-    task->dst.port = state->current_port;
+    task->ip = state->ip;
+    task->port = state->current_port;
     pthread_mutex_unlock(&mutex);
     return (true);
 }

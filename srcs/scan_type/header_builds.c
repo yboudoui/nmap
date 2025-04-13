@@ -1,24 +1,25 @@
 #include "packet_capture/header.h"
 
-struct iphdr build_ip_header(uint8_t *datagram, uint32_t saddr, uint32_t daddr, uint8_t protocol)
+#define DFT_TTL 64
+struct iphdr build_ip_header(in_addr_t src_ip, in_addr_t dst_ip, uint8_t protocol)
 {
     struct iphdr ip_header = {0};
 
-    ip_header.ihl = 5;
-    ip_header.version = 4;
-    ip_header.tos = 0;
-    ip_header.tot_len = sizeof(struct iphdr) + sizeof(struct tcphdr);
-    ip_header.id = htons(54321); // ID of this packet
-    ip_header.frag_off = 0;
-    ip_header.ttl = 64;
-    ip_header.protocol = protocol;
-    ip_header.saddr = saddr;
-    ip_header.daddr = daddr;
+    ip_header.saddr = src_ip;       // Source IP
+    ip_header.daddr = dst_ip;       // Destination IP
+
+    ip_header.frag_off = 0;         // No fragmentation
+
+    ip_header.check = 0;            // Checksum (kernel calculates this)
+    ip_header.id = 0;               // Packet ID (kernel assigns if 0)
+    ip_header.tot_len = 0;          // Total length (kernel fills this)
+
+    ip_header.ihl = 5;              // Header length (5 * 32-bit words = 20 bytes)
+    ip_header.tos = 0;              // Type of service (default)
+    ip_header.ttl = DFT_TTL;        // Time-to-live (defined as 64)
+    ip_header.protocol = protocol;  // Transport protocol
+    ip_header.version = IPVERSION;  // IPv4 (likely defined as 4)
     
-    // IP checksum
-    ip_header.check = ip_checksum(
-        datagram,
-        ip_header.tot_len);
     return (ip_header);
 }
 

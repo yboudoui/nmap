@@ -163,7 +163,7 @@ static void *ft_pcap_routine(void *user_data)
     return (NULL);
 }
 
-t_error capture_packet(t_error (*user_callback)(void*), void *user_data)
+t_error capture_packet(t_error (*user_callback)(t_pcap_data_wraper*), void *user_data)
 {
     pcap_if_t   *devices = NULL;
     pcap_t      *handle = NULL;
@@ -181,11 +181,12 @@ t_error capture_packet(t_error (*user_callback)(void*), void *user_data)
         .device_addr = ((struct sockaddr_in *)addr->addr)->sin_addr,
         .user_data = user_data,
     };
+    printf("Capture packet from IP: %s\n", inet_ntoa(wraper.device_addr));
 
     printf("looking for packets\n");
     pthread_create(&thread, NULL, ft_pcap_routine, &wraper);
     printf("sending start\n");
-    error = user_callback(user_data);
+    error = user_callback(&wraper);
     printf("sending stop\n");
     pthread_join(thread, NULL);
     ft_pcap_clean(&handle, &devices);

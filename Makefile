@@ -59,22 +59,11 @@ SRC_POOL = \
 	$(addprefix utils/, $(SRC_POOL_UTILS)) \
 	pool.c 
 
-SRC_SCAN_TYPE_UTILS = \
+SRC_SCAN_TYPE = \
 	checksum.c \
 	header_builds.c \
+	packet_builder.c \
 	print.c
-
-SRC_SCAN_TYPE_PACKET = \
-	ack.c \
-	fin.c \
-	null.c \
-	syn.c \
-	upd.c \
-	xmas.c
-
-SRC_SCAN_TYPE = \
-	$(addprefix utils/, $(SRC_SCAN_TYPE_UTILS)) \
-	$(addprefix packet/, $(SRC_SCAN_TYPE_PACKET)) \
 
 SRC_UTILS = \
 	error.c \
@@ -159,7 +148,9 @@ vagrant:
 
 test:
 	valgrind \
+		--quiet \
 		--leak-check=full \
+		--show-leak-kinds=all \
 		./ft_nmap --ports 80-81 --ip 127.0.0.1 --scan ACK SYN
 
 -include $(DEPS)
