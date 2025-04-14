@@ -1,4 +1,4 @@
-#include "packet_capture/header.h"
+#include "packet/builder.h"
 
 #define DFT_TTL 64
 struct iphdr build_ip_header(in_addr_t src_ip, in_addr_t dst_ip, uint8_t protocol)
@@ -23,7 +23,7 @@ struct iphdr build_ip_header(in_addr_t src_ip, in_addr_t dst_ip, uint8_t protoco
     return (ip_header);
 }
 
-struct tcphdr build_tcp_header(uint16_t dst_port, uint32_t saddr, uint32_t daddr, uint8_t flags)
+struct tcphdr build_tcp_header(uint16_t dst_port, in_addr_t saddr, in_addr_t daddr, uint8_t flags)
 {
     struct tcphdr   header = {0};
 

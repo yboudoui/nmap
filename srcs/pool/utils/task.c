@@ -1,4 +1,7 @@
 #include "pool/pool.h"
+#include "nmap_data.h"
+
+#include <string.h>
 
 static bool get_next_ip(t_task_state *state, t_task *task)
 {
@@ -63,27 +66,6 @@ static bool get_next_port(t_task_state *state, t_task *task)
     return (false);
 }
 
-static t_fp_packet_builder switch_packet_builder(t_scan_type type)
-{
-    switch (type)
-    {
-    case SCAN_SYN:
-        return (syn_packet);
-    case SCAN_NULL:
-        return (null_packet);
-    case SCAN_ACK:
-        return (ack_packet);
-    case SCAN_FIN:
-        return (fin_packet);
-    case SCAN_XMAS:
-        return (xmas_packet);
-    case SCAN_UDP:
-        return (udp_packet);
-    default:
-        return (NULL);
-    }
-}
-
 static bool get_next_scan_type(t_task_state *state, t_task *task)
 {
     t_nmap_data *nmap_data = state->user_data;
@@ -100,7 +82,6 @@ static bool get_next_scan_type(t_task_state *state, t_task *task)
     while(all[state->scan_index] != SCAN_NONE) {
         if (nmap_data->args.scan_flags & all[state->scan_index]) {
             task->scan_flag = all[state->scan_index];
-            task->packet_builder = switch_packet_builder(task->scan_flag);
             state->scan_index += 1;
             return (true);
         }
@@ -110,8 +91,7 @@ static bool get_next_scan_type(t_task_state *state, t_task *task)
     return (false);
 }
 
-// #define PRINT_DEBUG
-#ifdef PRINT_DEBUG
+#if 0
 #define DEBUG(fmt , ...) printf(fmt, ##__VA_ARGS__)
 #else
 #define DEBUG(fmt , ...) do{}while(0)

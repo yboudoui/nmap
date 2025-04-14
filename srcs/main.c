@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "pool/pool.h"
-#include "packet_capture/packet.h"
+#include "packet/packet.h"
 #include "nmap_data.h"
 
 int main(int ac, char *av[])

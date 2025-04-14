@@ -1,4 +1,4 @@
-#include "packet_capture/packet.h"
+#include "packet/capture.h"
 
 #define MAX_PACKET_PROCESSED 0
 

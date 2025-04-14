@@ -1,5 +1,6 @@
 #include "scan_type/flags.h"
 
+#include <stdlib.h> // TODO: remove it
 char* get_scan_flag_name(t_scan_type scan_type)
 {
     switch (scan_type){

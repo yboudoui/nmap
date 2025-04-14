@@ -1,17 +1,16 @@
-#include "packet_capture/packet.h"
+#include "packet/packet.h"
+#include "nmap_data.h"
 
-void on_udp(t_packet *data)
+void on_udp(t_packet_info *data)
 {
     uint16_t src_port, dst_port;
-
-    t_udp_info info = build_udp_info(data->raw_packet, data->ip);
-    src_port = ntohs(info.header->source);
-    dst_port = ntohs(info.header->dest);
+    src_port = ntohs(data->udp.header->source);
+    dst_port = ntohs(data->udp.header->dest);
 
     // if (is_our_scan_response(dst_port) == false)
     // {
     //     return;
     // }
     printf("[UDP Scan] Port %d is OPEN (Received UDP response)\n", src_port);
-    save_result(data, NULL);
+    nmap_update(data->user_data, data /* the data */);
 }

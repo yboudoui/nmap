@@ -24,6 +24,14 @@ static t_fp_flag   get_command(char *str) {
 }
 
 static void init_arguments(t_arguments* args) {
+    #define SCAN_ALL 0  \
+    | SCAN_SYN          \
+    | SCAN_NULL         \
+    | SCAN_ACK          \
+    | SCAN_FIN          \
+    | SCAN_XMAS         \
+    | SCAN_UDP
+    
     memset(args, 0, sizeof(t_arguments));
     args->port_range[START] = 1;
     args->port_range[END] = 1024;

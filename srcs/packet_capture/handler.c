@@ -1,21 +1,37 @@
-#include "packet_capture/packet.h"
-#include <net/ethernet.h>
-#include "pool/pool.h" // TODO: 1 remove it
+#include "packet/packet.h"
 
-static int find_ip(void *incomming, void *t)
+static void packet_dispatch(t_packet_info *packet_info)
 {
-    struct in_addr  *src = t;
-    t_task          *task = incomming;
-    struct in_addr  dst = {
-        .s_addr = task->ip,
-    };
-    #if 0
-    printf("src: %s => %d\n", inet_ntoa(*src), src->s_addr);
-    printf("dst: %s => %d\n", inet_ntoa(dst),  dst.s_addr);
-    printf("=> %d\n",(src->s_addr == dst.s_addr));
-    #endif
-    return (!(src->s_addr == dst.s_addr));
+    switch (packet_info->ip.header->protocol) {
+        case IPPROTO_TCP: {
+            switch (packet_info->tcp.scan_type) {
+            case SCAN_SYN:  return (on_syn(packet_info));
+            case SCAN_NULL: return (on_null(packet_info));
+            case SCAN_ACK:  return (on_ack(packet_info));
+            case SCAN_FIN:  return (on_fin(packet_info));
+            case SCAN_XMAS: return (on_xmas(packet_info));
+            default:        return;
+            }
+        }   
+        case IPPROTO_UDP: {
+            return (on_udp(packet_info));
+        }
+        case IPPROTO_ICMP: {
+            switch (packet_info->icmp.header->type) {
+                case ICMP_DEST_UNREACH:     return (icmp_on_unreachable(packet_info));
+                case ICMP_TIME_EXCEEDED:    return (icmp_on_timeout(packet_info));
+            }
+        }
+        default:            return;
+    }
 }
+
+
+
+
+#include <net/ethernet.h>
+#include "nmap_data.h"
+#include "pool/pool.h" // TODO: 1 remove it
 
 void packet_handler(uint8_t *user_data, const struct pcap_pkthdr *pkthdr, const uint8_t *packet)
 {
@@ -24,20 +40,18 @@ void packet_handler(uint8_t *user_data, const struct pcap_pkthdr *pkthdr, const 
     t_task_state        *state = wraper->user_data; // TODO: remove it (cf 1)
     t_nmap_data         *nd = state->user_data;
 
-    int count = queue_count(nd->queue.in);
-    if (count == 0) {
+    if (nmap_is_input_empty(nd)) {
         pcap_breakloop(wraper->handle);
         return ;
     }
-    t_packet  data = new_packet((void*)nd, packet);
+    t_packet_info  data = new_packet((void*)nd, packet);
     if (data.eth.type != ETHERTYPE_IP) {
         return;
     }
 
     if (data.ip.ip->ip_src.s_addr == wraper->device_addr.s_addr) {
-        t_node *found = queue_find_data(nd->queue.in, &data.ip.ip->ip_dst, find_ip);
-        if (found) {
-            printf("Sent %s %p\n\n", inet_ntoa(data.ip.ip->ip_dst), found);
+        if (nmap_have_ip(nd, &data.ip.ip->ip_dst.s_addr) == true) {
+            printf("Sent %s\n\n", inet_ntoa(data.ip.ip->ip_dst));
             fflush(stdout);
         }
     }
@@ -54,26 +68,8 @@ void packet_handler(uint8_t *user_data, const struct pcap_pkthdr *pkthdr, const 
     printf("%s %ld\n", inet_ntoa(data.ip.ip->ip_src), packet_count);
     #endif
 
-    t_node *found = queue_find_data(nd->queue.in, &data.ip.ip->ip_src, find_ip);
-    if (!found) {
+    if (nmap_have_ip(nd, &data.ip.ip->ip_src.s_addr) == false) {
         return;
     }
-    queue_remove_node(nd->queue.in, found);
-
-    switch (data.ip.header->protocol) {
-        case IPPROTO_TCP: {
-            t_tcp_info info = build_tcp_info(data.raw_packet, data.ip);
-            switch (info.scan_type) {
-            case SCAN_SYN:  return (on_syn(&data, &info));
-            case SCAN_NULL: return (on_null(&data, &info));
-            case SCAN_ACK:  return (on_ack(&data, &info));
-            case SCAN_FIN:  return (on_fin(&data, &info));
-            case SCAN_XMAS: return (on_xmas(&data, &info));
-            default:        return;
-            }
-        }   
-        case IPPROTO_UDP:   return (on_udp(&data));
-        case IPPROTO_ICMP:  return (on_icmp(&data));
-        default:            return;
-    }
+    packet_dispatch(&data);
 }

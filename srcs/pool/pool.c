@@ -1,11 +1,26 @@
 #include "pool/pool.h"
 #include "utils/threads.h"
+#include "utils/buffer.h"
+#include "nmap_data.h"
 
-void    *memdup(void *src, size_t size)
+#include "packet/builder.h"
+#include <string.h>
+#include <errno.h>
+
+bool    send_packet(int sock, t_buffer *buffer, in_addr_t dst_ip)
 {
-    uint8_t *mem = calloc(1, size);
-    if (!mem) return (NULL);
-    return (memcpy(mem, src, size));
+    int                 sent;
+    struct sockaddr_in  dst;
+        
+    dst.sin_family = AF_INET,
+    dst.sin_addr.s_addr = dst_ip,
+
+    sent = sendto(sock, buffer->data, buffer->count, 0, (struct sockaddr *)&dst, sizeof(dst));
+    if (sent >= 0) {
+        return (true);
+    }
+    printf("send_packet error: %s\n", strerror(errno));
+    return (false);
 }
 
 static void* routine(void *user_data)
@@ -15,36 +30,19 @@ static void* routine(void *user_data)
     t_nmap_data         *nd = state->user_data;
     t_task              task = {0};
 
-    struct sockaddr_in  dest = {
-        .sin_family = AF_INET,
+    uint8_t     packet_buf[IP_MAXPACKET];
+    t_buffer    buffer = {
+        .data       = packet_buf,
+        .size       = sizeof(uint8_t),
+        .capacity   = IP_MAXPACKET,
     };
-    uint8_t     packet_buf[IP_MAXPACKET] = {0};
-    uint32_t    packet_len = 0;
 
     while (get_next_task(&task, state)) {
-
-        t_task *cpy = memdup(&task, sizeof(t_task));
-        queue_emplace_front(nd->queue.in, cpy);
-
-        dest.sin_addr.s_addr = task.ip;
-
-        packet_len = task.packet_builder(
-            packet_buf,
-            wrapper->device_addr.s_addr,
-            task.ip, task.port
-        );
-
-        // Send the packet
-        int sent = sendto(nd->sock,
-            packet_buf, packet_len,
-            0,
-            (struct sockaddr *)&dest, sizeof(dest)
-        );
-        if (sent < 0) {
-            printf("Error on sendto\n");
-        }
-
         print_task(task);
+        build_packet(&buffer, task, wrapper->device_addr.s_addr);
+        if(send_packet(nd->sock, &buffer, task.ip)) {
+            nmap_push_task(nd, task);
+        }
     }
     return (NULL);
 }
@@ -57,7 +55,7 @@ t_error send_packets_pool(t_pcap_data_wraper *wrapper)
 
     error = threads_pool(data->args.speedup, routine, wrapper);
     if (error) {
-        return (err_wrap(&error, 1, "unable send or capture packets"));
+        return (err_wrap(&error, 1, "unable send packets"));
     }
     return (error);
 }

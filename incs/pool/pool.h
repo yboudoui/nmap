@@ -1,9 +1,9 @@
 #ifndef POOL_H
 #define POOL_H
 
-#include "nmap_data.h"
-#include "packet_capture/scan_type.h"
-#include "packet_capture/packet.h"
+#include "scan_type/flags.h"
+#include "packet/packet.h"
+#include "packet/capture.h"
 
 typedef struct s_task_state {
     size_t          scan_index;
@@ -16,7 +16,6 @@ typedef struct s_task_state {
 } t_task_state;
 
 typedef struct s_task {
-    t_fp_packet_builder packet_builder;
     t_scan_type         scan_flag;
     in_addr_t           ip;
     uint32_t            port;

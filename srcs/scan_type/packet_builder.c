@@ -1,10 +1,11 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+// #include <stdio.h>
+// #include <unistd.h>
+// #include <sys/socket.h>
+// #include <netinet/in.h>
+// #include <arpa/inet.h>
 
-#include "packet_capture/header.h"
+#include <string.h>
+#include "packet/builder.h"
 
 /*
 How it Works:
@@ -13,7 +14,6 @@ How it Works:
     If the response is RST, the port is unfiltered (reachable but not necessarily open).
     If there is no response, the port is filtered (blocked by a firewall).
 */
-
 uint32_t ack_packet(uint8_t *packet_buf, in_addr_t src_ip, in_addr_t dst_ip, uint32_t port_dst)
 {
     struct iphdr ip_header = build_ip_header(src_ip, dst_ip, IPPROTO_TCP);
@@ -111,8 +111,6 @@ How it Works:
     If the port is open, there is no response.
     If filtered, there’s no response or an ICMP unreachable message.
 */
-
-#define XMAX_FLAGS FIN_FLAG | PSH_FLAG | URG_FLAG
 uint32_t xmas_packet(uint8_t *packet_buf, in_addr_t src_ip, in_addr_t dst_ip, uint32_t port_dst)
 {
     struct iphdr ip_header = build_ip_header(src_ip, dst_ip, IPPROTO_TCP);
@@ -121,4 +119,26 @@ uint32_t xmas_packet(uint8_t *packet_buf, in_addr_t src_ip, in_addr_t dst_ip, ui
     memcpy(packet_buf, &ip_header, sizeof(struct iphdr));
     memcpy(packet_buf + sizeof(struct iphdr), &tcp_header, sizeof(struct tcphdr));
     return (ip_header.tot_len);
+}
+
+#include "scan_type/flags.h"
+
+typedef uint32_t (*t_fp_packet_builder)(uint8_t *packet_buf, in_addr_t src_ip, in_addr_t dst_ip, uint32_t dst_port);
+
+void    build_packet(t_buffer *buffer, t_task task, in_addr_t src_ip)
+{
+    t_fp_packet_builder builder;
+
+    switch (task.scan_flag) {
+    case SCAN_SYN:  builder = syn_packet;   break;
+    case SCAN_NULL: builder = null_packet;  break;
+    case SCAN_ACK:  builder = ack_packet;   break;
+    case SCAN_FIN:  builder = fin_packet;   break;
+    case SCAN_XMAS: builder = xmas_packet;  break;
+    case SCAN_UDP:  builder = udp_packet;   break;
+    default:        builder = NULL;         break;
+    }
+    if(builder) {
+        buffer->count = builder(buffer->data, src_ip, task.ip, task.port);
+    }
 }

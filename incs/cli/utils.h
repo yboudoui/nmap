@@ -29,7 +29,6 @@ bool scan(t_arg_helper*);
 bool file(t_arg_helper*);
 bool output_format(t_arg_helper *);
 
-
 void show_help(void);
 
 typedef void (*t_fp_on_error)(char *fmt, ...);

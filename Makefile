@@ -23,13 +23,6 @@ SRC_CLI = \
 	cli.c \
 	utils.c
 
-SRC_PACKET_CAPTURE_INFO = \
-	eth_info.c \
-	icmp_info.c \
-	ip_info.c \
-	tcp_info.c \
-	udp_info.c
-
 SRC_PACKET_CAPTURE_LISTENER = \
 	ack.c \
 	fin.c \
@@ -46,8 +39,8 @@ SRC_PACKET_CAPTURE = \
 	$(addprefix info/, $(SRC_PACKET_CAPTURE_INFO)) \
 	$(addprefix listener/, $(SRC_PACKET_CAPTURE_LISTENER)) \
 	$(addprefix utils/, $(SRC_PACKET_CAPTURE_UTILS)) \
-	packet.c \
 	handler.c \
+	info.c \
 	packet_capture.c
 
 
@@ -86,19 +79,20 @@ SOURCES = \
 OBJECTS := $(SOURCES:.c=.o)
 
 HEADERS = \
-	cli.h \
-	cli_utils.h \
-	packet.h \
-	pool.h \
-	scan_type.h \
-	packet/header.h \
-	packet/checksum.h \
-	packet/scan_type.h \
+	cli/cli.h \
+	cli/utils.h \
+	packet_capture/checksum.h \
+	packet_capture/header.h \
+	packet_capture/info.h \
+	packet_capture/packet.h \
+	pool/pool.h \
+	scan_type/flags.h \
 	utils/error.h \
-	utils/threads.h \
 	utils/node.h \
 	utils/queue.h \
-	nmap_data.h 
+	utils/threads.h \
+	nmap_data.h \
+	socket.h 
 
 
 SRCS = $(addprefix $(SRCS_DIR)/, $(SOURCES))

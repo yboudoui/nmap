@@ -1,4 +1,4 @@
-#include "packet_capture/packet.h"
+#include "packet/packet.h"
 
 void    print_mac_address(uint8_t ether_host[ETH_ALEN])
 {
