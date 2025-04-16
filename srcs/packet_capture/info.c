@@ -59,6 +59,8 @@ static t_udp_info  build_udp_info(const uint8_t *raw_packet, t_ip_info ip_info)
 
     info.header_ptr = ip_info.header_ptr + ip_info.header_len;
     info.header = (struct udphdr *)(info.header_ptr);
+    info.port.src = ntohs(info.header->source);
+    info.port.dst = ntohs(info.header->dest);
     return (info);
 }
 
@@ -84,10 +86,14 @@ t_packet_info    new_packet(uint8_t *user_data, const uint8_t *raw_packet)
     switch (packet_info.ip.header->protocol) {
         case IPPROTO_TCP: {
             packet_info.tcp = build_tcp_info(packet_info.raw_packet, packet_info.ip);
+            packet_info.port.src = packet_info.tcp.port.src;
+            packet_info.port.dst = packet_info.tcp.port.dst;
             break;
         }
         case IPPROTO_UDP: {
             packet_info.udp = build_udp_info(packet_info.raw_packet, packet_info.ip);
+            packet_info.port.src = packet_info.udp.port.src;
+            packet_info.port.dst = packet_info.udp.port.dst;
             break;
         }
         case IPPROTO_ICMP: {
@@ -95,4 +101,30 @@ t_packet_info    new_packet(uint8_t *user_data, const uint8_t *raw_packet)
         }
     }
     return (packet_info);
+}
+
+static const char *print_protocol_info(uint8_t protocol)
+{
+    switch (protocol) {
+        case IPPROTO_TCP:   return ("TCP");
+        case IPPROTO_UDP:   return ("UDP");
+        case IPPROTO_ICMP:  return ("ICMP");
+        default:            return (NULL);
+    }
+}
+
+void    print_packet_info(t_packet_info *info)
+{
+    char src_str[INET_ADDRSTRLEN];
+    char dst_str[INET_ADDRSTRLEN];
+
+    inet_ntop(AF_INET, &info->ip.ip->ip_src, src_str, INET_ADDRSTRLEN);
+    inet_ntop(AF_INET, &info->ip.ip->ip_dst, dst_str, INET_ADDRSTRLEN);
+
+    printf("[%s] %s:%d -> %s:%d\n",
+        print_protocol_info(info->ip.ip->ip_p),
+        src_str, info->port.src, 
+        dst_str, info->port.dst
+    );
+    fflush(stdout);
 }

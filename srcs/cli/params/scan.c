@@ -11,20 +11,23 @@ static const struct s_scan_type_map {
     {"FIN",     SCAN_FIN},
     {"XMAS",    SCAN_XMAS},
     {"UDP",     SCAN_UDP},
-    {NULL,      SCAN_NONE}
+    {NULL,      NO_SCAN_TYPE}
 };
 
 static t_scan_type   get_scan_type(char *str) {
-    if (str == NULL) return (SCAN_NONE);
-    for(int i = 0; scan_map[i].str; i++) {
-        if (match_with(scan_map[i].str, str))
-            return (scan_map[i].type);
+    if (str == NULL) {
+        return (NO_SCAN_TYPE);
     }
-    return (SCAN_NONE);
+    for(int i = 0; scan_map[i].str; i++) {
+        if (match_with(scan_map[i].str, str)) {
+            return (scan_map[i].type);
+        }
+    }
+    return (NO_SCAN_TYPE);
 }
 
 bool scan(t_arg_helper *args) {
-    t_scan_type     flags = SCAN_NONE;
+    t_scan_type     flags = NO_SCAN_TYPE;
     static size_t   once = 0;
     if (0
         || !call_me_once(&once, "--scan is already used")
@@ -32,15 +35,17 @@ bool scan(t_arg_helper *args) {
         return (false);
         
     t_scan_type current = get_scan_type(args->av[0]);
-    while (current != SCAN_NONE) {
+    while (current != NO_SCAN_TYPE) {
         flags |= current;
-        if(!shift_args_by(args, 1)) break;
+        if(!shift_args_by(args, 1)) {
+            break;
+        }
         current = get_scan_type(args->av[0]);
     }
-    if (flags == SCAN_NONE) {
+    if (flags == NO_SCAN_TYPE) {
         fprintf(stderr, "ERRO: --scan bad parameters\n");
         return (false);
     }
-    args->argument->scan_flags = flags;
+    args->argument->scan_type = flags;
     return (true);
 }

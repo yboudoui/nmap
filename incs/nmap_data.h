@@ -5,7 +5,6 @@
 #include "utils/error.h"
 
 #include "cli/cli.h"
-#include "socket.h"
 
 typedef struct s_nmap_data {
     t_arguments args;

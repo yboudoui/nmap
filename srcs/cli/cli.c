@@ -2,7 +2,8 @@
 
 #include <string.h>
 
-static t_fp_flag   get_command(char *str) {
+static t_fp_flag   get_command(char *str)
+{
     static const struct s_command_map {
         char        *name;
         t_fp_flag   callback;
@@ -23,25 +24,19 @@ static t_fp_flag   get_command(char *str) {
     return (NULL);
 }
 
-static void init_arguments(t_arguments* args) {
-    #define SCAN_ALL 0  \
-    | SCAN_SYN          \
-    | SCAN_NULL         \
-    | SCAN_ACK          \
-    | SCAN_FIN          \
-    | SCAN_XMAS         \
-    | SCAN_UDP
-    
+static void init_arguments(t_arguments* args)
+{   
     memset(args, 0, sizeof(t_arguments));
     args->port_range[START] = 1;
     args->port_range[END] = 1024;
-    args->scan_flags = SCAN_ALL;
+    args->scan_type = DEFAULT_SCAN_TYPE_PARAMETER;
     args->speedup = 1;
 }
 
-bool    parse_argument(t_arguments *args, int ac, char* av[]) {
+bool    parse_argument(t_arguments *args, int ac, char* av[])
+{
     init_arguments(args);
-    t_arg_helper        helper  = { args, ac - 1, av + 1 };
+    t_arg_helper    helper  = { args, ac - 1, av + 1 };
 
     if (ac <= 1) {
         show_help();

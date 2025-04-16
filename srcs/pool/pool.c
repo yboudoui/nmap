@@ -6,6 +6,7 @@
 #include "packet/builder.h"
 #include <string.h>
 #include <errno.h>
+#include "utils/debug.h"
 
 bool    send_packet(int sock, t_buffer *buffer, in_addr_t dst_ip)
 {
@@ -22,7 +23,8 @@ bool    send_packet(int sock, t_buffer *buffer, in_addr_t dst_ip)
     printf("send_packet error: %s\n", strerror(errno));
     return (false);
 }
-
+#include <arpa/inet.h>
+#include <stdio.h>
 static void* routine(void *user_data)
 {
     t_pcap_data_wraper  *wrapper = user_data;
@@ -30,17 +32,24 @@ static void* routine(void *user_data)
     t_nmap_data         *nd = state->user_data;
     t_task              task = {0};
 
-    uint8_t     packet_buf[IP_MAXPACKET];
-    t_buffer    buffer = {
-        .data       = packet_buf,
-        .size       = sizeof(uint8_t),
-        .capacity   = IP_MAXPACKET,
+    uint8_t             packet_buf[IP_MAXPACKET];
+    t_packet_builder_args builder = {
+        .buffer     = {
+            .data       = packet_buf,
+            .size       = sizeof(uint8_t),
+            .capacity   = IP_MAXPACKET,
+        },
+        .src_ip     = wrapper->device_addr.s_addr,
     };
-
     while (get_next_task(&task, state)) {
-        print_task(task);
-        build_packet(&buffer, task, wrapper->device_addr.s_addr);
-        if(send_packet(nd->sock, &buffer, task.ip)) {
+        WITH_DEBUG(1) {
+            print_task(task);
+        }
+        builder.dst_ip     = task.ip,
+        builder.dst_port   = task.port,
+        builder.scan_type  = task.scan_flag,
+        build_packet(&builder);
+        if(send_packet(nd->sock, &builder.buffer, task.ip)) {
             nmap_push_task(nd, task);
         }
     }

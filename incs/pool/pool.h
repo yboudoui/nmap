@@ -1,7 +1,7 @@
 #ifndef POOL_H
 #define POOL_H
 
-#include "scan_type/flags.h"
+#include "scan_type.h"
 #include "packet/packet.h"
 #include "packet/capture.h"
 

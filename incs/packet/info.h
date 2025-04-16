@@ -16,7 +16,7 @@
 #include <netinet/udp.h>
 #include <netinet/ip_icmp.h>
 
-#include "scan_type/flags.h"
+#include "scan_type.h"
 #include "utils/queue.h"
 
 typedef struct s_eth_info {
@@ -46,6 +46,10 @@ typedef struct s_tcp_info {
 typedef struct s_udp_info {
     const uint8_t   *header_ptr;
     struct udphdr   *header;
+    struct {
+        uint16_t src;
+        uint16_t dst;
+    } port;
 } t_udp_info;
 
 typedef struct s_icmp_info {
@@ -58,11 +62,18 @@ typedef struct s_packet {
     const uint8_t   *raw_packet;
     t_eth_info      eth;
     t_ip_info       ip;
+
     t_tcp_info      tcp;
     t_udp_info      udp;
+    struct {
+        uint16_t src;
+        uint16_t dst;
+    } port;
+
     t_icmp_info     icmp;
 } t_packet_info;
 
-t_packet_info    new_packet(uint8_t *user_data, const uint8_t *raw_packet);
+t_packet_info   new_packet(uint8_t *user_data, const uint8_t *raw_packet);
+void            print_packet_info(t_packet_info *info);
 
 #endif // PACKET_INFO_H

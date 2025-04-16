@@ -12,7 +12,7 @@ static void packet_dispatch(t_packet_info *packet_info)
             case SCAN_XMAS: return (on_xmas(packet_info));
             default:        return;
             }
-        }   
+        }
         case IPPROTO_UDP: {
             return (on_udp(packet_info));
         }
@@ -33,6 +33,7 @@ static void packet_dispatch(t_packet_info *packet_info)
 #include "nmap_data.h"
 #include "pool/pool.h" // TODO: 1 remove it
 
+#include "utils/debug.h"
 void packet_handler(uint8_t *user_data, const struct pcap_pkthdr *pkthdr, const uint8_t *packet)
 {
     (void)pkthdr;
@@ -44,6 +45,7 @@ void packet_handler(uint8_t *user_data, const struct pcap_pkthdr *pkthdr, const 
         pcap_breakloop(wraper->handle);
         return ;
     }
+
     t_packet_info  data = new_packet((void*)nd, packet);
     if (data.eth.type != ETHERTYPE_IP) {
         return;
@@ -51,25 +53,44 @@ void packet_handler(uint8_t *user_data, const struct pcap_pkthdr *pkthdr, const 
 
     if (data.ip.ip->ip_src.s_addr == wraper->device_addr.s_addr) {
         if (nmap_have_ip(nd, &data.ip.ip->ip_dst.s_addr) == true) {
-            printf("Sent %s\n\n", inet_ntoa(data.ip.ip->ip_dst));
-            fflush(stdout);
+            print_packet_info(&data);
         }
+    }
+
+    WITH_DEBUG(0) {
+        static size_t packet_count = 0;
+        if (packet_count == 0) printf("\n");
+        packet_count += 1;
+        printf("\033[1A");  // Move cursor up one line
+        printf("\033[K");   // Clear the line
+        printf("[%zu] -> ", packet_count);
+        print_packet_info(&data);
     }
     
     if (data.ip.ip->ip_dst.s_addr != wraper->device_addr.s_addr) {
         return;
     }
 
-    #if 0
-    static size_t packet_count = 0;
-    packet_count += 1;
-    printf("\033[1A"); // Move cursor up one line
-    printf("\033[K");   // Clear the line
-    printf("%s %ld\n", inet_ntoa(data.ip.ip->ip_src), packet_count);
-    #endif
+
+
+    WITH_DEBUG(0) {
+        static size_t packet_count = 0;
+        if (packet_count == 0) printf("\n");
+        packet_count += 1;
+        printf("\033[1A");  // Move cursor up one line
+        printf("\033[K");   // Clear the line
+        printf("[%zu] -> ", packet_count);
+        print_packet_info(&data);
+    }
 
     if (nmap_have_ip(nd, &data.ip.ip->ip_src.s_addr) == false) {
         return;
     }
+    printf("received :");
+    print_packet_info(&data);
+
     packet_dispatch(&data);
 }
+
+
+

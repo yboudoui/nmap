@@ -55,6 +55,7 @@ static bool get_next_port(t_task_state *state, t_task *task)
 
     if (state->current_port == 0) {
         state->current_port = nmap_data->args.port_range[START];
+        // printf("-> %d\n", state->current_port); // TODO: fix the port offset, I should take care of the retry
     }
 
     if (state->current_port <= nmap_data->args.port_range[END]) {
@@ -62,6 +63,7 @@ static bool get_next_port(t_task_state *state, t_task *task)
         state->current_port += 1;
         return (true);
     }
+
     state->current_port = 0;
     return (false);
 }
@@ -77,10 +79,10 @@ static bool get_next_scan_type(t_task_state *state, t_task *task)
     static const t_scan_type    all[] =  {
         SCAN_SYN, SCAN_NULL, SCAN_ACK,
         SCAN_FIN, SCAN_XMAS, SCAN_UDP,
-        SCAN_NONE,
+        NO_SCAN_TYPE,
     };
-    while(all[state->scan_index] != SCAN_NONE) {
-        if (nmap_data->args.scan_flags & all[state->scan_index]) {
+    while(all[state->scan_index] != NO_SCAN_TYPE) {
+        if (IS(nmap_data->args.scan_type, all[state->scan_index])) {
             task->scan_flag = all[state->scan_index];
             state->scan_index += 1;
             return (true);
@@ -91,11 +93,7 @@ static bool get_next_scan_type(t_task_state *state, t_task *task)
     return (false);
 }
 
-#if 0
-#define DEBUG(fmt , ...) printf(fmt, ##__VA_ARGS__)
-#else
-#define DEBUG(fmt , ...) do{}while(0)
-#endif
+#include "utils/debug.h"
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 bool get_next_task(t_task *task, t_task_state *state)

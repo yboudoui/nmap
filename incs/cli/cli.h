@@ -5,7 +5,17 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 
-#include "scan_type/flags.h"
+#include "scan_type.h"
+
+#define DEFAULT_SCAN_TYPE_PARAMETER 0  \
+    | SCAN_SYN      \
+    | SCAN_NULL     \
+    | SCAN_ACK      \
+    | SCAN_FIN      \
+    | SCAN_XMAS     \
+    | SCAN_UDP
+
+#define NO_SCAN_TYPE 0
 
 typedef enum e_output_format {
     FORMAT_NONE,
@@ -26,7 +36,7 @@ typedef struct s_arguments {
             FILE*       fs;
         } data;
     }           ip_list;
-    t_scan_type scan_flags;
+    t_scan_type scan_type;
     int         port_range[MAX_RANGE];
 
     size_t          speedup;
@@ -34,6 +44,5 @@ typedef struct s_arguments {
 } t_arguments;
 
 bool    parse_argument(t_arguments *args, int ac, char* av[]);
-
 
 #endif // CLI_H

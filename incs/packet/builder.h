@@ -1,17 +1,18 @@
 #ifndef PACKET_BUILDER_H
 #define PACKET_BUILDER_H
 
-#include <netinet/ip.h>
-#include <netinet/tcp.h>
-#include <netinet/udp.h>
+#include "scan_type.h"
+#include "utils/buffer.h"
+#include <netinet/in.h>
 
-uint16_t        ip_checksum(uint8_t *buf, int nwords);
-uint16_t        tcp_checksum(uint8_t *ptr, int nbytes, in_addr_t src_addr, in_addr_t dst_addr);
+typedef struct s_packet_builder_args {
+    t_buffer    buffer;
+    in_addr_t   src_ip;
+    in_addr_t   dst_ip;
+    uint32_t    dst_port;
+    t_scan_type scan_type;
+} t_packet_builder_args;
 
-struct iphdr    build_ip_header(in_addr_t src_ip, in_addr_t dst_ip, uint8_t protocol);
-struct tcphdr   build_tcp_header(uint16_t dst_port, in_addr_t saddr, in_addr_t daddr, uint8_t flags);
-
-#include "pool/pool.h"
-void    build_packet(t_buffer *buffer, t_task task, in_addr_t src_ip);
+void    build_packet(t_packet_builder_args *args);
 
 #endif // PACKET_BUILDER_H
