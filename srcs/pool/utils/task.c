@@ -29,7 +29,6 @@ static bool get_next_ip(t_task_state *state, t_task *task)
         }
         line[strcspn(line, "\n")] = 0;
         if (inet_pton(AF_INET, line, &task->ip) == 1) {
-            fprintf(stdout, "IP address parsed: %u\n", task->ip);
             state->ip_available = true;
             state->current_port = 0;
             return (true); 
