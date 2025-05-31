@@ -55,10 +55,9 @@ static bool get_next_port(t_task_state *state, t_task *task)
 
     if (state->current_port == 0) {
         state->current_port = nmap_data->args.port_range[START];
-        // printf("-> %d\n", state->current_port); // TODO: fix the port offset, I should take care of the retry
-    }
-
-    if (state->current_port <= nmap_data->args.port_range[END]) {
+        task->port = state->current_port;
+        return (true);
+    } else if (state->current_port < nmap_data->args.port_range[END]) {
         task->port = state->current_port;
         state->current_port += 1;
         return (true);
