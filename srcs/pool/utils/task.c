@@ -24,12 +24,14 @@ static bool get_next_ip(t_task_state *state, t_task *task)
     case CMD_FILE: {
         if (!fgets(line, sizeof(line), ip_list.data.fs)) {
             fclose(ip_list.data.fs);
-            state->ip_available = true;
             state->current_port = 0;
             return (false);
         }
         line[strcspn(line, "\n")] = 0;
         if (inet_pton(AF_INET, line, &task->ip) == 1) {
+            fprintf(stdout, "IP address parsed: %u\n", task->ip);
+            state->ip_available = true;
+            state->current_port = 0;
             return (true); 
         } else {
             fprintf(stderr, "Invalid IP address format: %s\n", line); // TODO: Error handling
