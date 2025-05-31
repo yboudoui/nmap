@@ -28,7 +28,8 @@ static bool get_next_ip(t_task_state *state, t_task *task)
             return (false);
         }
         line[strcspn(line, "\n")] = 0;
-        if (inet_pton(AF_INET, line, &task->ip) == 1) {
+        fprintf(stdout, "Ip read: %s\n", line);
+        if (inet_pton(AF_INET, line, &state->ip) == 1) {
             state->ip_available = true;
             state->current_port = 0;
             return (true); 
